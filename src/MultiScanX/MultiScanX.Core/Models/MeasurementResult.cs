@@ -58,3 +58,4 @@ namespace MultiScanX.Core.Models
         public bool OverallJudgement { get; set; } = true;
     }
 }
+

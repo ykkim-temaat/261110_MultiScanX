@@ -61,3 +61,4 @@ namespace MultiScanX.Hardware.Ajinextek
         public bool IsDoorClosed() => GetInputBit(2);                    // IN3: 도어 인터록 센서
     }
 }
+

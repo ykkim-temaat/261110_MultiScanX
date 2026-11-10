@@ -75,7 +75,13 @@
 ---
 
 ### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
-- [ ] **1. THK 볼스크류(BNK2005, BS1402) 및 장납기 부품(Lead Time 6~8주) 견적/발주 우선 검토**
-- [ ] **2. KCT 고객사 협의 준비: MMS PC2 프로브 사양(8종 중) 및 기판 얼라인(Pattern vs Edge) 체크리스트 확정**
-- [ ] **3. 아진엑스텍 AXL 라이브러리(EzSoftwareUC) 기반 통합 제어 소프트웨어 아키텍처 및 통신 프로토콜 설계서 작성**
+> [!IMPORTANT]
+> **다음 세션 시작 시 첫 질문으로 재개:**  
+> **"슬레이브 모듈 간 물리적 배선(RJ45 이더넷 케이블) 순서 확인"**  
+> 전장 도면 Page 9 토폴로지 기준: `마스터 카드 ECAT OUT ➔ N3ECAT-CNT2 (IN-OUT) ➔ N3ECAT-DB32T (IN-OUT) ➔ N3ECAT-AI16 (IN)` 순서로 결선되어 있는지 확인 후, `scratch/ethercat_bench_test.py` 실물 벤치 테스트 진행!
+
+- [ ] **1. [최우선 질문] 슬레이브 모듈 3종(CNT2, DB32T, AI16) 물리적 RJ45 배선 순서 확인 및 실물 벤치마크 테스트 실행**
+- [ ] **2. EzSoftwareUC 드라이버 설치 확인 및 실물 하드웨어에서 `python scratch/ethercat_bench_test.py` 실행 (DB32T DO 점멸 및 DI/CNT/AI 모니터링)**
+- [ ] **3. Keyence CL-3000(CL-S015) 이더넷 TCP/IP 통신 실물 연동 테스트**
+- [ ] **4. 기판 정렬(Loading Align) 방식 (기구 가이드 vs CL-S015 엣지 스캔) 세부 로직 확정**
 

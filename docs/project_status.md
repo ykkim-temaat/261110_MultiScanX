@@ -1,8 +1,9 @@
-# K社(KCT向) 박막두께 자동계측 시스템 프로젝트 현황 요약
+# MultiScanX 프로젝트 현황 요약 (K社 박막두께 자동계측 시스템)
 
 * **최종 업데이트 일자:** 2026-11-10
 * **주관 부서:** TeMaat 기술연구소
-* **상태:** 기구/전장 설계 완료 ➔ 제어 소프트웨어(MultiScan-X Studio) 본격 개발 및 가상 시뮬레이션 완료 단계
+* **상태:** 기구/전장 설계 완료 ➔ 아진엑스텍 EtherCAT 제어 솔루션(PCIe 마스터 + 슬레이브 3종) 벤치 테스트 및 S/W 개발 단계
+* **원격 저장소:** `git@github.com:ykkim-temaat/261110_MultiScanX.git`
 
 ---
 
@@ -10,16 +11,17 @@
 
 | 버전 (Rev) | 개정/수정 일자 | 작성자 / 부서 | 주요 개정 및 수정 내용 |
 | :---: | :---: | :---: | :--- |
+| **Rev 1.2** | 2026-11-10 | TeMaat 기술연구소 | • 프로젝트 공식 명칭 `MultiScanX` 확정 및 GitHub 원격저장소 연동<br/>• Keyence CL-3000(CL-S015) Ethernet TCP/IP 통신 확정<br/>• PCIe 마스터 + 슬레이브 3종(CNT2, DB32T, AI16) 전용 벤치 테스트 도구 구축 |
 | **Rev 1.1** | 2026-11-10 | TeMaat 기술연구소 | • 설계 완료에 따른 제어 S/W(MultiScan-X Studio) 본격 개발 착수<br/>• `src/MultiScanX` C# .NET 솔루션 스캐폴딩 및 아진엑스텍 AXL/계측기 연동 완료<br/>• 30 Point Recipe 기반 로드셀 30g 정압 터치 인터록 및 .txt 파일 생성 시뮬레이션 검증 완료 |
 | **Rev 1.0** | 2026-11-10 | TeMaat 기술연구소 | • 프로젝트 초기화 및 표준 AI 협업 환경(`.agents/AGENTS.md`) 구축 완료<br/>• 고객 요구사항(PPTX), 전장도면 18개 시트(PDF), 부품발주 검토(Excel) 전수 분석 및 현황판 수록 |
 
 ---
 
 ## 1. 프로젝트 개요
-* **프로젝트명:** K社(KCT向) 박막두께 자동계측 시스템 제작 검토 및 개발
-* **저장소 폴더명:** `261110_MultiSensor-Metrology`
+* **프로젝트명:** MultiScanX (K社 KCT向 박막두께 자동계측 시스템)
+* **저장소 폴더명 / GitHub:** `git@github.com:ykkim-temaat/261110_MultiScanX.git`
 * **주관:** TeMaat 기술연구소
-* **개발 목표:** Thick Cu, 광학투과막(Filmetrics F20), TTV(레이저 변위) 3종 계측기를 통합 탑재하여 $510 \times 515\text{ mm}$ 대형 패널 기판의 휨(Warpage)을 극복하고 다포인트 전자동 박막 두께 매핑을 수행하는 고정밀 계측 장비 개발
+* **개발 목표:** Thick Cu, 광학투과막(Filmetrics F20), TTV(Keyence CL-3000 공초점) 3종 계측기를 통합 탑재하여 $510 \times 515\text{ mm}$ 대형 패널 기판의 휨(Warpage)을 극복하고 다포인트 전자동 박막 두께 매핑을 수행하는 고정밀 계측 장비 개발
 
 ---
 
@@ -28,7 +30,7 @@
 ### (1) 핵심 계측기 구성 (Multi-Sensor Configuration)
 * **Thick Cu 두께 측정:** Fischerscope MMS PC2 (RS-232C 통신, 전용 프로브 8종 중 선정 예정)
 * **광학투과막 두께 측정:** Filmetrics F20-EXR (USB 통신, Z축 광학 초점 자동 제어)
-* **TTV 단차/휨 측정:** Keyence 레이저 변위센서 (검토 중)
+* **TTV 단차/휨 및 변위 측정 (최종 확정 🏆):** **Keyence CL-3000 컨트롤러 + CL-S015 초소형 공초점 광학 변위센서 헤드** (측정거리 15mm, Gigabit Ethernet TCP/IP 소켓 통신 확정)
 * **기판 접촉압 감지:** CAS BCL 1kg 싱글포인트 로드셀 + CI-600A 인디케이터 (프로브 보호 인터록)
 
 ### (2) 기구 및 스테이지 구동계 (Mechanics & Motion)

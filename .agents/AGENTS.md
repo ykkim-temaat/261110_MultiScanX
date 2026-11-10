@@ -1,5 +1,5 @@
 # Antigravity Workspace Rules & Standard Engineering Collaboration Protocol
-# 프로젝트: K社(KCT向) 박막두께 자동계측 시스템 (261110_MultiSensor-Metrology)
+# 프로젝트: MultiScanX (K社 KCT向 박막두께 자동계측 시스템)
 
 ## 1. 세션 시작 시 필수 수행 절차 (MANDATORY ON NEW SESSION)
 * 새로운 세션이 시작되거나 사용자의 첫 요청을 받을 때, **가장 먼저 `docs/session_history.md` 및 `docs/project_status.md` 파일을 확인(`read_file`)**하여 이전 진행 상황과 결정 사항, 향후 수행해야 할 과제(`Next Action Items`)를 파악합니다.

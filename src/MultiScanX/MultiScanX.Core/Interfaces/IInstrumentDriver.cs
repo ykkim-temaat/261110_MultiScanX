@@ -33,3 +33,4 @@ namespace MultiScanX.Core.Interfaces
         void Tare(); // 영점 보정
     }
 }
+

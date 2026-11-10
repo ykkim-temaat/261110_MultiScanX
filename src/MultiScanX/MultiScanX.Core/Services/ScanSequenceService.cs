@@ -227,3 +227,4 @@ namespace MultiScanX.Core.Services
         }
     }
 }
+

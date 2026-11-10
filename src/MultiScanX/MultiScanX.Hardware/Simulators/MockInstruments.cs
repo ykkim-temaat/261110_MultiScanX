@@ -56,3 +56,4 @@ namespace MultiScanX.Hardware.Simulators
         }
     }
 }
+

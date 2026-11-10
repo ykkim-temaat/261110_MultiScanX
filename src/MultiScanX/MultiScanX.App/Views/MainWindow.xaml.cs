@@ -27,3 +27,4 @@ namespace MultiScanX.App.Views
         }
     }
 }
+

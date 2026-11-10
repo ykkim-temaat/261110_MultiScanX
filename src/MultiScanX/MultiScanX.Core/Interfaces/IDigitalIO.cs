@@ -27,3 +27,4 @@ namespace MultiScanX.Core.Interfaces
         bool IsDoorClosed();
     }
 }
+

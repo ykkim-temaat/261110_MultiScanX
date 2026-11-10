@@ -81,3 +81,4 @@ namespace MultiScanX.Hardware.Ajinextek
         public static extern int AxcTriggerEnable(int lChannelNo, uint uOnOff);
     }
 }
+

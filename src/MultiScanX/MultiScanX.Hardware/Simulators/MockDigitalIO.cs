@@ -31,3 +31,4 @@ namespace MultiScanX.Hardware.Simulators
         public bool IsDoorClosed() => true;
     }
 }
+

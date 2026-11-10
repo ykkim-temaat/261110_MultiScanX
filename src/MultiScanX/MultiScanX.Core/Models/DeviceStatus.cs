@@ -41,3 +41,4 @@ namespace MultiScanX.Core.Models
         public string MachineState { get; set; } = "IDLE"; // IDLE, RUNNING, PAUSED, ERROR
     }
 }
+

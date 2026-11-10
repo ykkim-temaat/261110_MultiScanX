@@ -26,3 +26,4 @@ namespace MultiScanX.Core.Interfaces
         double GetLinearScaleZ();
     }
 }
+

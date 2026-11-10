@@ -50,3 +50,4 @@ namespace MultiScanX.Core.Models
         public bool EnableTtvLaser { get; set; } = true;// TTV 레이저 변위 측정 여부
     }
 }
+

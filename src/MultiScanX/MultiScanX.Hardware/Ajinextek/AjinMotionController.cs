@@ -130,3 +130,4 @@ namespace MultiScanX.Hardware.Ajinextek
         }
     }
 }
+
