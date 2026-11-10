@@ -11,6 +11,7 @@
 
 | 버전 (Rev) | 개정/수정 일자 | 작성자 / 부서 | 주요 개정 및 수정 내용 |
 | :---: | :---: | :---: | :--- |
+| **Rev 1.4** | 2026-11-10 | TeMaat 기술연구소 | • C# .NET WPF 제어 S/W 단일 EXE 빌드 파이프라인(`src/build_deploy.ps1`) 구축 및 220KB 초경량 배포 실증 완료<br/>• 전장 안전 규격(IEC 60204-1/SEMI S2) 준수: 소프트웨어 조작 버튼 `측정 중지(Stop Scan)` 분리 및 `HW EMO` 감시 인디케이터 신설<br/>• IPC 실물 모니터 1:1 실시간 화면 미러링을 위한 VNC(TightVNC Server + RealVNC Viewer) 가이드 수립 |
 | **Rev 1.3** | 2026-11-10 | TeMaat 기술연구소 | • `부품발주 검토_261109.xlsx` 내 단일화된 `부품발주_Panasonic` 시트 기준으로 BOM SSOT 최종 동기화 완료<br/>• 산업용 PC(Nuvo-9002E) 실물 셋업 및 Hello World 검증 가이드(`261110-06`) 연동 |
 | **Rev 1.2** | 2026-11-10 | TeMaat 기술연구소 | • 프로젝트 공식 명칭 `MultiScanX` 확정 및 GitHub 원격저장소 연동<br/>• Keyence CL-3000(CL-S015) Ethernet TCP/IP 통신 확정<br/>• PCIe 마스터 + 슬레이브 3종(CNT2, DB32T, AI16) 전용 벤치 테스트 도구 구축 |
 | **Rev 1.1** | 2026-11-10 | TeMaat 기술연구소 | • 설계 완료에 따른 제어 S/W(MultiScan-X Studio) 본격 개발 착수<br/>• `src/MultiScanX` C# .NET 솔루션 스캐폴딩 및 아진엑스텍 AXL/계측기 연동 완료<br/>• 30 Point Recipe 기반 로드셀 30g 정압 터치 인터록 및 .txt 파일 생성 시뮬레이션 검증 완료 |

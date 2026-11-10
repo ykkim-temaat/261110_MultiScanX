@@ -30,6 +30,15 @@ Desktop.ini
 *.pem
 *.key
 
+# .NET 빌드 및 컴파일 임시 파일 (Rule 09)
+bin/
+obj/
+*.pdb
+*.user
+*.suo
+MultiScanX_deploy/04_App_Release/bin/
+results/
+
 # 대용량 설치 패키지 및 압축 파일 격리 (Git 50MB~100MB 제한 대응 - Rule 09)
 *.zip
 *.7z
@@ -37,5 +46,6 @@ Desktop.ini
 *.iso
 *.msi
 *.exe
+02_데이터시트 및 관련자료/01-2_EzSoftwareUC*/
 
 

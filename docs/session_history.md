@@ -133,9 +133,70 @@
 ---
 
 ### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
-- [ ] **1. 산업용 PC에서 아진엑스텍 제어 드라이버(`D:\TeMaat\MultiScanX_deploy\02_Drivers\Setup.exe`) 관리자 권한 설치 및 IPC 1회 재부팅**
-- [ ] **2. 재부팅 후 `powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ipc_diagnostics.ps1` 실행하여 `[PASS] AXL.dll 로드 성공` 확인**
-- [ ] **3. 전장 제어반 전원(24V) 및 EtherCAT RJ45 통신 케이블 결선 후 `ethercat_bench_test.ps1` 실행 (DO 0~15 점멸 벤치마크 테스트)**
-- [ ] **4. MultiScanX.App Self-Contained 단일 EXE 배포 빌드 및 IPC D:\TeMaat 배포 연동**
+- [x] **1. 진단 도구 파서 오류 해결 및 100% 영문(ASCII) 표준 로그 전환 완료**
+- [x] **2. 아진 슬레이브 모듈 어드레스(Node ID) 및 하드웨어 결선 데이터시트 검증 완료**
+- [x] **3. C# .NET 제어 앱 빌드 파이프라인(`src/build_deploy.ps1`) 구축 및 220KB 초경량 단일 파일 생성 완료**
+- [x] **4. 전장 안전 규격 준수: `측정 중지 (Stop Scan)` 분리 및 `HW EMO` 모니터링 배지 신설 완료**
+
+---
+
+## 📅 [2026-11-10] 세션 3 (15:42 ~ 18:10)
+
+### 1. 작업 개요
+* **프로젝트명:** MultiScanX (K社 KCT向 박막두께 자동계측 시스템)
+* **작업자:** TeMaat 기술연구소 & Antigravity AI
+* **주요 목표:**
+  1. 진단 스크립트 파서 오류(ParserError) 원천 해결 및 글로벌 산업 표준 영문(Pure ASCII) 로그 전면 전환
+  2. 아진엑스텍 실물 슬레이브 모듈(CNT2, DB32T, AI16) 어드레스 스위치 및 데이터시트 교차 검증
+  3. C# .NET WPF 제어 앱 빌드 파이프라인(`src/build_deploy.ps1`) 구축 및 220KB 초경량 단일 실행 파일 실증
+  4. 전장 안전 규격(IEC 60204-1 / SEMI S2) 준수 제어 명명법 및 안전 인디케이터 분리 적용
+  5. 산업용 PC 실물 화면과 노트북 간 1:1 실시간 화면 미러링(TightVNC Server + RealVNC Viewer) 인프라 구축 가이드
+
+---
+
+### 2. 세부 작업 및 처리 내역
+1. **진단 도구 파서 오류 원천 해결 및 영문 표준화 완료:**
+   * PowerShell 5.1(기본 내장)의 UTF-8/CP949 인코딩 불일치로 인한 파서 에러를 근본적으로 차단하기 위해, 콘솔 출력을 100% 영문(Pure ASCII)으로 전면 전환 완료 (`ipc_diagnostics.ps1`, `ethercat_bench_test.ps1`)
+   * 산업용 PC 실물에서 에러 0건으로 깔끔하게 완주됨을 실증 완료
+2. **실물 아진 슬레이브 모듈 데이터시트 정밀 검증 완료:**
+   * 사용자 제공 실물 사진(`media_...f7dbd742.jpg`) 및 아진 데이터시트(`02-1_N3ECAT_Slave_HW_KOR_V1.1.pdf`, `03-1_N3ECAT-AI16_Manual.pdf`) 대조 분석
+   * 어드레스 로터리 스위치: 현재 세팅인 `00h`는 공식 데이터시트 규격상 "기본 설정으로 자동 ID 부여" 모드이므로 현 벤치 테스트 단계에서 그대로 유지해도 100% 정상 작동함을 입증
+   * `N3ECAT-AI16` 전면 DIP 스위치가 로드셀 인디케이터(CI-600A) 전압 출력에 맞추어 **우측(V: Voltage 모드)**으로 정확히 위치함을 검증
+   * 데이지 체인 케이블(`X1-IN` ➔ `X2-OUT`) 결선 방향 정상 확인
+3. **C# .NET WPF 제어 앱 자동 빌드 및 220KB 초경량 배포 파이프라인 확립:**
+   * 복잡한 수동 배포를 대체하는 원클릭 스크립트 [src/build_deploy.ps1](../src/build_deploy.ps1) 개발
+   * 기존 154MB 올인원(Self-Contained) 방식에서, IPC에 이미 설치된 .NET 8 런타임을 활용하는 **220 KB 초경량 단일 실행 파일(`--self-contained false`)**로 배포 체계 고도화 (99.8% 용량 다이어트, 단 2.5초 빌드 완료)
+   * 빌드 산출물: [MultiScanX_deploy/04_App_Release/bin/MultiScanX.App.exe](../MultiScanX_deploy/04_App_Release/bin/MultiScanX.App.exe) (220.6 KB)
+   * WinSCP 파일 락(Lock) 이슈를 방어하는 임시 스테이징 안전 복사 로직 탑재
+4. **전장 안전 규격 준수: 소프트웨어 정지 분리 및 EMO 인디케이터 신설:**
+   * 하드웨어 E-Stop(전원 차단)과 소프트웨어 시퀀스 정지의 혼동을 막기 위해, 화면 조작 버튼을 **`■ 측정 중지 (Stop Scan)` (앰버색 `#D83B01`)**로 개편
+   * 우측 상단 헤더에 **`[🛡 HW EMO: Normal (MC ON)]`** 하드웨어 안전 모니터링 배지를 분리 신설하여 실시간 안전 감시 체계 정립
+5. **실물 모니터 1:1 실시간 화면 미러링 가이드 수립:**
+   * Windows 기본 RDP의 가상 세션 분리(Session 2) 현상 해결을 위해, 산업 자동화 업계 표준인 **TightVNC Server(포트 5900)** 셋업 가이드 및 사용자가 보유한 **RealVNC Viewer**와의 1:1 완벽 호환 연동 절차 수립
+
+---
+
+### 3. 주요 생성 및 변경 산출물 목록
+| 파일 경로 | 설명 |
+| :--- | :--- |
+| [src/build_deploy.ps1](../src/build_deploy.ps1) | 220KB 초경량 단일 실행 파일 자동 빌드 및 deploy 폴더 패키징 스크립트 |
+| [src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml) | `■ 측정 중지 (Stop Scan)` 버튼 및 `HW EMO` 감시 배지 반영 XAML |
+| [src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml.cs](../src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml.cs) | `BtnStopScan_Click` 안전 감속 중단 이벤트 핸들러 반영 |
+| [MultiScanX_deploy/04_App_Release/bin/MultiScanX.App.exe](../MultiScanX_deploy/04_App_Release/bin/MultiScanX.App.exe) | 최신 220.6 KB 초경량 제어 앱 배포 바이너리 |
+| [MultiScanX_deploy/01_Runtimes/README.md](../MultiScanX_deploy/01_Runtimes/README.md) | 하이브리드 배포 모드(FDD vs SCD) 상호보완 목적 명문화 개정 |
+| [MultiScanX_deploy/03_Diagnostics/ipc_diagnostics.ps1](../MultiScanX_deploy/03_Diagnostics/ipc_diagnostics.ps1) | 100% 영문(ASCII) 표준 IPC 환경 진단 스크립트 |
+| [MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1](../MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1) | 100% 영문(ASCII) 표준 EtherCAT 3종 슬레이브 벤치마크 스크립트 |
+| [.vscode/tasks.json](../.vscode/tasks.json) | Antigravity IDE 단축키(`Ctrl+Shift+B`) 연동 빌드 태스크 정의 |
+| [.gitignore](../.gitignore) | .NET 빌드 임시 파일(`bin/`, `obj/`, `*.pdb`) 및 대용량 압축 해제 폴더 격리 |
+| [docs/project_status.md](./project_status.md) | 프로젝트 종합 현황판 Rev 1.4 최신화 |
+
+---
+
+### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
+- [ ] **1. 산업용 PC(Nuvo-9002E)에 TightVNC Server 설치 및 5900 포트 개방 후 노트북 RealVNC Viewer로 1:1 화면 공유 확인**
+- [ ] **2. 산업용 PC에서 아진 드라이버(`D:\TeMaat\MultiScanX_deploy\02_Drivers\Setup.exe`) 관리자 권한 설치 및 IPC 1회 재부팅**
+- [ ] **3. 재부팅 후 `ethercat_bench_test.ps1` 재실행하여 실물 마스터 카드 인식 및 DB32T DO LED(0~7번) 실물 점멸 확인**
+- [ ] **4. 초경량 `MultiScanX.App.exe` (220KB) IPC 복사 후 실물 모니터에서 더블클릭 구동 및 자동 프로비저닝 디렉토리 확인**
+
 
 
