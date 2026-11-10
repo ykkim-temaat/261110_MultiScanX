@@ -74,14 +74,68 @@
 
 ---
 
-### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
-> [!IMPORTANT]
-> **다음 세션 시작 시 첫 질문으로 재개:**  
-> **"슬레이브 모듈 간 물리적 배선(RJ45 이더넷 케이블) 순서 확인"**  
-> 전장 도면 Page 9 토폴로지 기준: `마스터 카드 ECAT OUT ➔ N3ECAT-CNT2 (IN-OUT) ➔ N3ECAT-DB32T (IN-OUT) ➔ N3ECAT-AI16 (IN)` 순서로 결선되어 있는지 확인 후, `scratch/ethercat_bench_test.py` 실물 벤치 테스트 진행!
+### 4. 이전 완료 작업 및 산출물 이력
+* 세션 1 산출물 및 이전 완료 내역 보존 완료
 
-- [ ] **1. [최우선 질문] 슬레이브 모듈 3종(CNT2, DB32T, AI16) 물리적 RJ45 배선 순서 확인 및 실물 벤치마크 테스트 실행**
-- [ ] **2. EzSoftwareUC 드라이버 설치 확인 및 실물 하드웨어에서 `python scratch/ethercat_bench_test.py` 실행 (DB32T DO 점멸 및 DI/CNT/AI 모니터링)**
-- [ ] **3. Keyence CL-3000(CL-S015) 이더넷 TCP/IP 통신 실물 연동 테스트**
-- [ ] **4. 기판 정렬(Loading Align) 방식 (기구 가이드 vs CL-S015 엣지 스캔) 세부 로직 확정**
+---
+
+## 📅 [2026-11-10] 세션 2 (12:07 ~ 15:25)
+
+### 1. 작업 개요
+* **프로젝트명:** MultiScanX (K社 KCT向 박막두께 자동계측 시스템)
+* **작업자:** TeMaat 기술연구소 & Antigravity AI
+* **주요 목표:**
+  1. 부품 발주 검토 엑셀 단일화(`부품발주_Panasonic`)에 따른 BOM SSOT 최신화 반영
+  2. 산업용 PC(Neousys Nuvo-9002E) 실물 셋업 및 개발 노트북 간 정석적 환경 분리 가이드 수립
+  3. 순정 윈도우 환경(Python 미설치) 대응 무설치 PowerShell 진단 체계 구축 및 실물 IPC 진단 검증 완료
+
+---
+
+### 2. 세부 작업 및 처리 내역
+1. **BOM 단일화 및 문서 연쇄 동기화 완료:**
+   * `02-3_부품발주 검토_261109.xlsx` 엑셀에서 과거 시트 삭제 후 단일화된 `부품발주_Panasonic` 시트 전수 점검 (46개 행, 공급금액 865만 원+기구 전동계 확정)
+   * `docs/261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md` 개정(Rev 1.1) 완료
+   * `docs/project_status.md` 현황판 개정(Rev 1.3) 완료
+2. **산업용 PC(Nuvo-9002E) 실무 셋업 가이드 및 C# 디렉토리 자가생성 고도화:**
+   * `docs/261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md` (Rev 1.4) 및 `MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md` (Rev 1.3) 전면 개정 완료
+   * 현장 실무 순서로 재편: [Step 1] OpenSSH/WinSCP 통로 개설 ➔ [Step 2] D:\TeMaat 패키지 업로드 ➔ [Step 3] 런타임/드라이버 설치 ➔ [Step 4] 앱 구동
+   * 수동 폴더 생성 지침을 전면 제거하고, `MultiScanX.App` C# 앱 시작 시(`App.xaml.cs`) `D:\MultiScanX_Data` 및 `C:\MultiScanX` 필수 폴더 자동 생성(Auto-Provisioning) 구현 완료
+   * 대용량 바이너리(.exe, .zip) Git 제외 유지 및 `01_Runtimes/README.md`, `02_Drivers/README.md`에 공식 인터넷 직접 다운로드 방법 및 검증 절차 상세 수록 완료
+   * 윈도우 내장 OpenSSH Server 활성화, 재부팅 후 `netsh advfirewall...` 22번 포트 개방 및 WinSCP 연동 절차 실증 완료 및 SOP 영구 반영
+3. **순정 윈도우(PowerShell) 기반 무설치 진단 도구 전환 및 IPC 실물 검증 완료:**
+   * 신규 순정 IPC에 Python이 설치되지 않은 환경적 제약을 해결하기 위해, Python 의존성을 100% 제거하고 Windows 자체 내장 PowerShell P/Invoke 기반 무설치 진단 도구로 전면 교체
+     - `MultiScanX_deploy/03_Diagnostics/ipc_diagnostics.ps1`: 하드웨어, 스토리지(C/D), 네트워크(IP), .NET 8 데스크톱 런타임, 아진 `AXL.dll` 감지
+     - `MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1`: 3종 슬레이브(PCIe 마스터-A6B 서보 4축-DIO 16/16) P/Invoke 기반 벤치마크
+   * PowerShell 5.1 콘솔 코드페이지(CP949) 한글 깨짐 방지를 위해 `[Console]::OutputEncoding = UTF8` 및 UTF-8 with BOM(`utf-8-sig`) 저장 표준화 완료
+   * 산업용 PC 실물에서 `ipc_diagnostics.ps1` 실행 완료:
+     - OS: Windows 11 IoT Enterprise (빌드 26100) 64비트 정상
+     - CPU: Intel Core i5-13400 (10 Cores / 16 Threads) 정상
+     - 스토리지: C: (NVMe 500GB), D: (HDD 2TB) 정상 감지
+     - 네트워크: Wi-Fi(192.168.43.101) 정상 통신
+     - **.NET 8 데스크톱 런타임: [PASS] 정상 감지 완료**
+     - 아진 `AXL.dll`: 드라이버 설치 전 정상 미감지 상태 확인
+
+---
+
+### 3. 주요 생성 및 변경 산출물 목록
+| 파일 경로 | 설명 |
+| :--- | :--- |
+| [MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md](../MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md) | 산업용 제어 PC 표준 셋업 가이드 및 체크리스트 (SOP Rev 1.3) |
+| [MultiScanX_deploy/03_Diagnostics/ipc_diagnostics.ps1](../MultiScanX_deploy/03_Diagnostics/ipc_diagnostics.ps1) | 무설치 PowerShell 기반 IPC 하드웨어 및 .NET 8 / AXL.dll 환경 진단 스크립트 |
+| [MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1](../MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1) | 무설치 PowerShell 기반 EtherCAT 3종 슬레이브 P/Invoke 통신 벤치마크 스크립트 |
+| [MultiScanX_deploy/01_Runtimes/README.md](../MultiScanX_deploy/01_Runtimes/README.md) | .NET 8 데스크톱 런타임 오프라인/온라인 설치 및 검증 가이드 |
+| [MultiScanX_deploy/02_Drivers/README.md](../MultiScanX_deploy/02_Drivers/README.md) | 아진 EzSoftwareUC 오프라인/온라인 설치 및 검증 가이드 |
+| [src/MultiScanX/MultiScanX.App/App.xaml.cs](../src/MultiScanX/MultiScanX.App/App.xaml.cs) | IPC 필수 디렉토리 자동 생성(Zero-Touch Provisioning) 로직 구현 |
+| [docs/261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md) | Nuvo-9002E 초기 셋업, OS 튜닝, 단일 EXE 배포 가이드 (Rev 1.4) |
+| [docs/261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md](./261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md) | `부품발주_Panasonic` 단일 시트 기준 BOM SSOT 동기화 (Rev 1.1) |
+| [docs/project_status.md](./project_status.md) | 프로젝트 종합 현황판 Rev 1.3 최신화 |
+
+---
+
+### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
+- [ ] **1. 산업용 PC에서 아진엑스텍 제어 드라이버(`D:\TeMaat\MultiScanX_deploy\02_Drivers\Setup.exe`) 관리자 권한 설치 및 IPC 1회 재부팅**
+- [ ] **2. 재부팅 후 `powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ipc_diagnostics.ps1` 실행하여 `[PASS] AXL.dll 로드 성공` 확인**
+- [ ] **3. 전장 제어반 전원(24V) 및 EtherCAT RJ45 통신 케이블 결선 후 `ethercat_bench_test.ps1` 실행 (DO 0~15 점멸 벤치마크 테스트)**
+- [ ] **4. MultiScanX.App Self-Contained 단일 EXE 배포 빌드 및 IPC D:\TeMaat 배포 연동**
+
 

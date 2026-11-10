@@ -11,6 +11,7 @@
 
 | 버전 (Rev) | 개정/수정 일자 | 작성자 / 부서 | 주요 개정 및 수정 내용 |
 | :---: | :---: | :---: | :--- |
+| **Rev 1.3** | 2026-11-10 | TeMaat 기술연구소 | • `부품발주 검토_261109.xlsx` 내 단일화된 `부품발주_Panasonic` 시트 기준으로 BOM SSOT 최종 동기화 완료<br/>• 산업용 PC(Nuvo-9002E) 실물 셋업 및 Hello World 검증 가이드(`261110-06`) 연동 |
 | **Rev 1.2** | 2026-11-10 | TeMaat 기술연구소 | • 프로젝트 공식 명칭 `MultiScanX` 확정 및 GitHub 원격저장소 연동<br/>• Keyence CL-3000(CL-S015) Ethernet TCP/IP 통신 확정<br/>• PCIe 마스터 + 슬레이브 3종(CNT2, DB32T, AI16) 전용 벤치 테스트 도구 구축 |
 | **Rev 1.1** | 2026-11-10 | TeMaat 기술연구소 | • 설계 완료에 따른 제어 S/W(MultiScan-X Studio) 본격 개발 착수<br/>• `src/MultiScanX` C# .NET 솔루션 스캐폴딩 및 아진엑스텍 AXL/계측기 연동 완료<br/>• 30 Point Recipe 기반 로드셀 30g 정압 터치 인터록 및 .txt 파일 생성 시뮬레이션 검증 완료 |
 | **Rev 1.0** | 2026-11-10 | TeMaat 기술연구소 | • 프로젝트 초기화 및 표준 AI 협업 환경(`.agents/AGENTS.md`) 구축 완료<br/>• 고객 요구사항(PPTX), 전장도면 18개 시트(PDF), 부품발주 검토(Excel) 전수 분석 및 현황판 수록 |
@@ -61,6 +62,8 @@
 | **분석** | [docs/261110-02_MultiSensor-Metrology_전장회로설계_및_시스템아키텍처_검토서.md](./261110-02_MultiSensor-Metrology_전장회로설계_및_시스템아키텍처_검토서.md) | 전장 회로도(18개 시트) 정밀 분석 및 시스템/안전 회로 검토서 |
 | **분석** | [docs/261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md](./261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md) | 부품 발주 검토 엑셀(2개 시트) 전사 명세 및 예산 비교 분석서 |
 | **분석** | [docs/261110-04_KCT고객사_기술협의_및_센서선정_검토서.md](./261110-04_KCT고객사_기술협의_및_센서선정_검토서.md) | KCT 고객사 기술협의용 프로브 8종/얼라인/인터록 기술검토서 |
+| **배포** | [MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md](../MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md) | 산업용 제어 PC 표준 셋업 가이드 및 체크리스트 (SOP) |
+| **가이드**| [docs/261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md) | Nuvo-9002E 셋업, OS 튜닝 및 Self-Contained 배포 가이드 |
 | **설계** | `../01_제작사양 및 설계자료/02-2_MultiSensor-Metrology_261109-1.pdf` | 전장 회로도 원본 CAD 출력 PDF (TM-DWG-260825 Rev. A) |
 | **BOM** | `../01_제작사양 및 설계자료/02-3_부품발주 검토_261109.xlsx` | 부품 발주 및 견적 검토 원본 엑셀 |
 | **매뉴얼**| `../02_데이터시트 및 관련자료/01-1_PCIe-R0805-ECAT-E_HW_KOR_V1.0_20260408.pdf` | 아진엑스텍 EtherCAT 마스터 카드 HW 매뉴얼 |

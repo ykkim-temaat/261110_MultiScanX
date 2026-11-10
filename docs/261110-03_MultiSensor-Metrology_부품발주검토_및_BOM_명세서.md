@@ -11,24 +11,28 @@
 
 | 버전 (Rev) | 개정/수정 일자 | 작성자 / 부서 | 주요 변경 내역 (Change Description) |
 | :---: | :---: | :---: | :--- |
+| **Rev 1.1** | 2026-11-10 | TeMaat 기술연구소 | • 엑셀 원본(`02-3_부품발주 검토_261109.xlsx`) 내 과거 '부품발주' 시트 삭제에 따른 단일화 반영<br/>• `부품발주_Panasonic` 단일 시트를 단일 진실 공급원(SSOT)으로 확정 및 전장도면 100% 일치 명세화 |
 | **Rev 1.0** | 2026-11-10 | TeMaat 기술연구소 | • `02-3_부품발주 검토_261109.xlsx` 엑셀 원본 2개 시트 전수 파싱 및 마크다운 텍스트 전사 완료<br/>• [Sheet 1] Panasonic EtherCAT 구성(전장도면 매핑안) 및 [Sheet 2] Yaskawa M-III 대안/기구BOM 비용 분석 수록 |
 
 ---
 
-## 1. 개요 및 구성 방안 비교
+## 1. 개요 및 단일 BOM 구성 확정
 
-본 부품 발주 검토서는 MultiSensor-Metrology 장비 제작에 필요한 서보 구동계, 초정밀 피드백계, 제어기 및 IPC, 전장/안전 배전계, 기계 전동계, 공압/진공계의 자재 명세 및 구매 견적을 분석한 문서입니다.
+본 부품 발주 검토서는 MultiSensor-Metrology(MultiScanX) 장비 제작에 필요한 서보 구동계, 초정밀 피드백계, 제어기 및 IPC, 전장/안전 배전계, 기계 전동계, 공압/진공계의 자재 명세 및 구매 견적을 확정한 문서입니다.  
+기존 검토 단계에 존재했던 Yaskawa Mechatrolink-III 대안 시트는 삭제되었으며, **전장 회로도(TM-DWG-260825 Rev. A)와 1:1 일치하는 `부품발주_Panasonic` 단일 시트를 기준으로 확정(SSOT)**되었습니다.
 
 ```mermaid
 flowchart TD
-    BOM["MultiSensor-Metrology BOM 구조"]
-    BOM --> Opt1["Option 1: Panasonic EtherCAT 구성 (도면 반영안 🏆)<br/>• 아진엑스텍 PCIe-R0805-ECAT-E 마스터<br/>• Panasonic MINAS A6B (X, Y 400W)<br/>• FASTECH Ezi-SERVOⅡ (Z축 브레이크)<br/>• Renishaw 50nm 리니어 스케일"]
-    BOM --> Opt2["Option 2: Yaskawa Mechatrolink-III 구성 (대안)<br/>• Yaskawa Σ-7 (X 400W, Y1/Y2 750W 갠트리, Z 400W)<br/>• Mechatrolink-III 통신 케이블 세트"]
+    BOM["MultiScanX 확정 BOM 구조 (Panasonic EtherCAT 단일안)"]
+    BOM --> ECAT["EtherCAT 제어계<br/>• 아진엑스텍 PCIe-R0805-ECAT-E (8축 마스터)<br/>• N3ECAT-CNT2 (2CH 고속 카운터)<br/>• N3ECAT-DB32T (16DI/16DO)<br/>• N3ECAT-AI16 (16CH 아날로그 입력)"]
+    BOM --> SERVO["서보 구동계<br/>• Panasonic MINAS A6B (X, Y 400W)<br/>• FASTECH Ezi-SERVOⅡ (Z축 브레이크 일체형)"]
+    BOM --> FEEDBACK["정밀 계측 피드백계<br/>• Renishaw 50nm 광학 리니어 스케일<br/>• CAS BCL 1kg 싱글포인트 로드셀 + CI-600A"]
+    BOM --> IPC["산업용 제어 PC & UI<br/>• Neousys Nuvo-9002E-BMI5 (i5-13400, 16G, 500G NVMe, 2T HDD)<br/>• Dell UltraSharp U2724D (27인치 QHD IPS)"]
 ```
 
 ---
 
-## 2. Option 1: Panasonic EtherCAT 부품 명세서 (도면 반영안 🏆)
+## 2. 확정 Panasonic EtherCAT 부품 명세서 (도면 반영안 🏆)
 
 전장회로도([`02-2_MultiSensor-Metrology_261109-1.pdf`](./261110-02_MultiSensor-Metrology_전장회로설계_및_시스템아키텍처_검토서.md))와 1:1 매핑되는 기준 발주 목록입니다:
 
