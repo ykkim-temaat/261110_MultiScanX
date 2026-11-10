@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>MultiScanX.App</RootNamespace>
+    <AssemblyName>MultiScanX.App</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MultiScanX.Core\MultiScanX.Core.csproj" />
+    <ProjectReference Include="..\MultiScanX.Hardware\MultiScanX.Hardware.csproj" />
+  </ItemGroup>
+
+</Project>
