@@ -1,6 +1,6 @@
 # [SOP] 산업용 제어 PC (Nuvo-9002E) 표준 셋업 가이드 및 체크리스트
 
-* **문서 버전:** Rev 1.3 (2026-11-10)
+* **문서 버전:** Rev 1.4 (2026-11-11)
 * **작성 부서:** (주)티마트 기술연구소 (TeMaat Automation)
 * **적용 대상:** MultiScanX (K社 KCT向 박막두께 자동계측 시스템) 제어 PC
 * **하드웨어 사양:** Neousys Nuvo-9002E-BMI5 (i5-13400, 16GB, 500GB NVMe + 2TB HDD)
@@ -90,22 +90,24 @@
   powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ethercat_bench_test.ps1
   ```
   * **확인 포인트:** N3ECAT-DB32T 모듈 전면의 DO 0번부터 15번까지 녹색 LED가 1개씩 순서대로 켜졌다 꺼지는지 육안으로 확인합니다!
-  * 콘솔 창에 `🎉 [테스트 완료] 아진엑스텍 EtherCAT 제어 솔루션 벤치마크 진단 성공!` 문구가 뜨면 하드웨어 통신 100% 정상입니다.
+  * 콘솔 창에 `[SUCCESS] EtherCAT 3-Module Benchmark Verification Finished!` 문구가 뜨면 하드웨어 통신 100% 정상입니다.
 
 ---
 
-### [5단계] 제어 프로그램 실행 및 디렉토리 자동 생성 (Zero-Touch)
-- [ ] **1. 프로그램 파일 복사 및 바로가기 생성:**
-  * `D:\TeMaat\MultiScanX_deploy\04_App_Release\`의 실행 파일들을 `C:\MultiScanX\bin\`으로 복사합니다.
-  * `MultiScanX.App.exe` 우클릭 ➔ **[바탕화면에 바로가기 만들기]**
-- [ ] **2. 최초 실행 및 자동 폴더 생성 확인:**
-  * 바탕화면 바로가기를 더블클릭하여 프로그램을 실행합니다.
-  * 프로그램이 실행되면서 아래 필수 디렉토리들이 1초 만에 스스로 자동 생성됩니다:
+### [5단계] 제어 프로그램 정식 설치 및 실행 (Inno Setup)
+- [ ] **1. 정식 인스톨러(`MultiScanX_Setup_v1.0.0.exe`) 더블클릭 설치:**
+  * `D:\TeMaat\MultiScanX_deploy\04_App_Release\MultiScanX_Setup_v1.0.0.exe` 파일을 더블클릭하여 설치 마법사를 실행합니다.
+  * 기본 경로(`C:\MultiScanX\`) 및 **[바탕 화면에 바로 가기 아이콘 만들기]** 체크를 확인한 후 **[설치]**를 완료합니다.
+  * *(`C:\MultiScanX\bin\MultiScanX.App.exe` 설치, 바탕화면 아이콘 생성, 제어판 Uninstall 등록이 자동으로 완료됩니다)*
+- [ ] **2. 최초 실행 및 데이터 폴더 자동 생성 확인:**
+  * 설치 완료 화면 또는 바탕화면의 **`MultiScan-X Studio`** 아이콘을 더블클릭하여 실행합니다.
+  * 프로그램이 켜지면서 2TB 데이터 드라이브(`D:\`)에 아래 필수 폴더들이 자동으로 생성됩니다:
     * `D:\MultiScanX_Data\Results\` (결과 리포트 저장소)
     * `D:\MultiScanX_Data\Maps\` (2D/3D 두께 매핑 원본)
     * `D:\MultiScanX_Data\Logs\` (설비 및 에러 로그)
     * `D:\MultiScanX_Data\Recipes\` (측정 레시피)
-    * `C:\MultiScanX\config\` (장비 고유 캘리브레이션 파라미터)
+- [ ] **(참고) 개발/시운전 중 빠른 패치 업데이트 시:**
+  * 개발 노트북에서 `.\src\build_deploy.ps1 -PatchOnly` 실행 ➔ 생성된 `src\Release_Bin\MultiScanX.App.exe` (220 KB)만 IPC의 `C:\MultiScanX\bin\`에 덮어쓰기 복사하면 재설치 없이 즉시 테스트 가능합니다.
 
 ---
 

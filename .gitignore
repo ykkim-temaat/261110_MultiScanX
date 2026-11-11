@@ -37,6 +37,7 @@ obj/
 *.user
 *.suo
 MultiScanX_deploy/04_App_Release/bin/
+src/Release_Bin/
 results/
 
 # 대용량 설치 패키지 및 압축 파일 격리 (Git 50MB~100MB 제한 대응 - Rule 09)

@@ -198,5 +198,48 @@
 - [ ] **3. 재부팅 후 `ethercat_bench_test.ps1` 재실행하여 실물 마스터 카드 인식 및 DB32T DO LED(0~7번) 실물 점멸 확인**
 - [ ] **4. 초경량 `MultiScanX.App.exe` (220KB) IPC 복사 후 실물 모니터에서 더블클릭 구동 및 자동 프로비저닝 디렉토리 확인**
 
+---
+
+## 📅 [2026-11-11] 세션 4 (10:20 ~ 11:25)
+
+### 1. 작업 개요
+* **주요 목표:**
+  1. Inno Setup 6 기반 Dual-Track 배포 파이프라인(초경량 패치 EXE + 공식 Setup.exe) 구축 및 IPC(`Nuvo-9002E`) 실물 설치 검증 완료
+  2. 개발/시운전용 PowerShell 명령어 치트시트(`261111-01`) 작성
+  3. Build-Time 버전 SSOT(`.csproj` `<Version>`) 및 Run-Time 설비 설정(`system_config.json`) 분리 아키텍처 적용 및 v1.0.2 빌드 검증
+
+### 2. 세부 작업 및 처리 내역
+1. **Inno Setup 6 정식 인스톨러 & Dual-Track 빌드 파이프라인 완성:**
+   * [src/MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss) 구축 (`C:\MultiScanX\bin\`, 바탕화면 바로가기, 제어판 제거 등록)
+   * [src/build_deploy.ps1](../src/build_deploy.ps1) 개선: `-PatchOnly` (초경량 228.6 KB EXE 고속 빌드) 및 기본 전체 실행 (Track 1 + Track 2 Setup.exe 동시 생성)
+   * IPC에서 `MultiScanX_Setup_v1.0.0.exe` 설치 및 바탕화면 바로가기 정상 실행 검증 완료(사용자 확인)
+2. **설정 파일 이원화 아키텍처 적용 (v1.0.2):**
+   * **Build-Time 버전 SSOT:** [MultiScanX.App.csproj](../src/MultiScanX/MultiScanX.App/MultiScanX.App.csproj)에 `<Version>1.0.2</Version>` 선언
+   * **Run-Time 장비 파라미터:** [SystemConfig.cs](../src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs) 및 [SystemConfigService.cs](../src/MultiScanX/MultiScanX.Core/Services/SystemConfigService.cs) 신규 구현 (`C:\MultiScanX\config\system_config.json` 자동 로드/생성, 쓰기 권한 제한 시 `LocalAppData` 폴백)
+   * **UI 데이터 바인딩:** [MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) 및 [MainWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml)에서 하드코딩 `[v1.0.1]` 제거 후 어셈블리 버전 및 `SystemConfig` 모드 배지 동적 바인딩 적용
+   * **인스톨러/스크립트 버전 연동 버그 수정:** `MultiScanX_Installer.iss`의 `#ifndef MyAppVersion` 가드 추가 및 `build_deploy.ps1`에서 `-Version` 생략 시 `.csproj` `<Version>` 자동 파싱 적용
+3. **v1.0.2 ~ v1.0.3 빌드 및 코멘트(`<Description>`) 연동 검증:**
+   * `v1.0.2` 전체 빌드 (`MultiScanX_Setup_v1.0.2.exe` 2.08 MB) 및 `C:\MultiScanX\config\system_config.json` 자동 생성 확인
+   * 사용자 요청에 따라 [MultiScanX.App.csproj](../src/MultiScanX/MultiScanX.App/MultiScanX.App.csproj)에 `<Version>1.0.3</Version>` 및 `<Description>`(빌드 코멘트) SSOT 추가, [`MainViewModel`](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) 부팅 로그 및 [build_deploy.ps1](../src/build_deploy.ps1) 빌드 출력 연동 완료
+   * `.\src\build_deploy.ps1 -PatchOnly` 실행 검증: `MultiScanX.App.exe` (232.6 KB, `FileVersion: 1.0.3.0`, `Comments` 필드 매핑) 및 정상 부팅(`Alive=True`) 확인
+
+### 3. 주요 생성 및 변경 산출물 목록
+| 파일 경로 | 설명 |
+| :--- | :--- |
+| [src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs](../src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs) | 설비 런타임 설정 모델 (`EquipmentName`, `UseSimulationMode`, `KeyenceIp/Port` 등) |
+| [src/MultiScanX/MultiScanX.Core/Services/SystemConfigService.cs](../src/MultiScanX/MultiScanX.Core/Services/SystemConfigService.cs) | `system_config.json` 로드 및 자동 초기화 서비스 |
+| [src/MultiScanX/MultiScanX.App/MultiScanX.App.csproj](../src/MultiScanX/MultiScanX.App/MultiScanX.App.csproj) | `<Version>1.0.3</Version>` 및 `<Description>` 빌드 코멘트 SSOT 정의 |
+| [src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) | 어셈블리 버전 및 `SystemConfig` 동적 바인딩 로직 |
+| [src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/MainWindow.xaml) | 헤더 버전/운전모드 배지 바인딩 적용 |
+| [src/MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss) | `#ifndef MyAppVersion` 커맨드라인 버전 전달 버그 수정 |
+| [src/build_deploy.ps1](../src/build_deploy.ps1) | `.csproj` 버전 자동 파싱 및 Dual-Track 패키징 스크립트 |
+| [docs/261111-01_개발_시운전_PowerShell_명령어_치트시트.md](./261111-01_개발_시운전_PowerShell_명령어_치트시트.md) | 개발 노트북 및 IPC 테스트/배포 PowerShell 명령어 모음 |
+
+### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
+- [ ] **1. (최우선) CNT2(고속 카운터/스케일), DIO(DB32T 입력/출력), AI(AI16 아날로그/로드셀) 등 하드웨어 점검용 I/O Check 화면(탭 또는 전용 창) 설계 및 구현**
+- [ ] **2. IPC에서 아진 드라이버(`Setup.exe`) 설치, 재부팅 및 `ethercat_bench_test.ps1` / I/O Check 화면으로 실물 슬레이브 연동 테스트**
+- [x] ~~v1.0.3 초경량 패치 EXE(`src\Release_Bin\MultiScanX.App.exe`) IPC `C:\MultiScanX\bin\` 덮어쓰기 후 실행 확인 (`[v1.0.3]`, 코멘트 로그, `system_config.json` 로드 검증 완료)~~
+
+
 
 
