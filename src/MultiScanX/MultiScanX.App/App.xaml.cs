@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using MultiScanX.App.Views;
 
 namespace MultiScanX.App
 {
@@ -12,13 +14,45 @@ namespace MultiScanX.App
 
             // [Auto-Provisioning] 프로그램 최초 실행 시 필요한 데이터/로그/레시피 디렉토리 자동 생성
             EnsureRequiredDirectoriesExist();
+
+            // 컴파일 심볼(LAYOUT_A / LAYOUT_B / LAYOUT_C), 실행 파일명, 또는 CLI 인자에 따라 3종 GUI 레이아웃 분기
+            Window mainWin = ResolveStartupLayoutWindow(e.Args);
+            MainWindow = mainWin;
+            mainWin.Show();
+        }
+
+        private static Window ResolveStartupLayoutWindow(string[] args)
+        {
+            string exeName = Path.GetFileNameWithoutExtension(Environment.ProcessPath ?? string.Empty).ToUpperInvariant();
+            string argStr = string.Join(" ", args).ToUpperInvariant();
+
+            if (argStr.Contains("LAYOUTB") || exeName.Contains("LAYOUTB"))
+            {
+                return new LayoutBWindow();
+            }
+            if (argStr.Contains("LAYOUTC") || exeName.Contains("LAYOUTC"))
+            {
+                return new LayoutCWindow();
+            }
+            if (argStr.Contains("LAYOUTA") || exeName.Contains("LAYOUTA"))
+            {
+                return new LayoutAWindow();
+            }
+
+#if LAYOUT_A
+            return new LayoutAWindow();
+#elif LAYOUT_B
+            return new LayoutBWindow();
+#else
+            // 최종 확정 GUI 레이아웃: 초안 C (미니멀 메인 관제 데스크 + 독립 플로팅 스튜디오 팝업형)
+            return new LayoutCWindow();
+#endif
         }
 
         private static void EnsureRequiredDirectoriesExist()
         {
             try
             {
-                // D: 드라이브 존재 여부 확인 후 자동 생성, 없으면 C: 드라이브로 폴백
                 string dataRoot = Directory.Exists(@"D:\") ? @"D:\MultiScanX_Data" : @"C:\MultiScanX_Data";
 
                 string[] requiredDirs = new[]
@@ -41,7 +75,7 @@ namespace MultiScanX.App
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[디렉토리 자동생성 오류] {ex.Message}");
+                Debug.WriteLine($"[디렉토리 자동생성 오류] {ex.Message}");
             }
         }
     }

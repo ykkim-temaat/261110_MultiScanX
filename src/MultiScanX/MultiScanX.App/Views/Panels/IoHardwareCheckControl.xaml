@@ -1,0 +1,237 @@
+<UserControl x:Class="MultiScanX.App.Views.Panels.IoHardwareCheckControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="1400" d:DesignHeight="850">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="460"/>
+            <!-- Left: 3축 JOG / CNT2 / CI-600A 로드셀 / EtherCAT Slaves -->
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+            <!-- Right: DB32T 16 DI / 16 DO 실시간 점검 & 명칭 편집 -->
+        </Grid.ColumnDefinitions>
+
+        <!-- 좌측: 3축 JOG & CNT2 리니어스케일 & CAS CI-600A 로드셀 & EtherCAT 슬레이브 -->
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- 1. 3축 모션 수동 JOG & CNT2 Renishaw 50nm 리니어스케일 -->
+                <Border Style="{StaticResource PastelCardStyle}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="🕹 3축 서보/스텝 수동 JOG &amp; CNT2 (Renishaw 50nm) 점검" Style="{StaticResource SectionTitleStyle}"/>
+                        <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,8">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,4">
+                                    <TextBlock Text="X축 (Panasonic 400W 갠트리):" Foreground="#475569" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding CurrXFormatted, Mode=OneWay}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#1D4ED8"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,4">
+                                    <TextBlock Text="Y축 (Panasonic 400W 포러스척):" Foreground="#475569" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding CurrYFormatted, Mode=OneWay}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#047857"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,4">
+                                    <TextBlock Text="Z축 (FASTECH Full-Closed + Brake):" Foreground="#475569" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding CurrZFormatted, Mode=OneWay}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#6D28D9"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Text="CNT2 CH0 (Renishaw 50nm Scale):" Foreground="#475569" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding Cnt2ScaleFormatted, Mode=OneWay}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#7C3AED"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- XY JOG Step & Buttons -->
+                        <WrapPanel Margin="0,0,0,6" VerticalAlignment="Center">
+                            <TextBlock Text="XY Step(mm):" VerticalAlignment="Center" Width="85" FontWeight="SemiBold" Foreground="#334155"/>
+                            <Button Content="0.1" Width="46" Margin="0,0,4,0" Style="{StaticResource SoftActionButton}" Click="BtnStepXY_Click" Tag="0.1"/>
+                            <Button Content="1.0" Width="46" Margin="0,0,4,0" Style="{StaticResource SoftActionButton}" Click="BtnStepXY_Click" Tag="1.0"/>
+                            <Button Content="10.0" Width="52" Margin="0,0,4,0" Style="{StaticResource SoftActionButton}" Click="BtnStepXY_Click" Tag="10.0"/>
+                            <Button Content="50.0" Width="52" Margin="0,0,8,0" Style="{StaticResource SoftActionButton}" Click="BtnStepXY_Click" Tag="50.0"/>
+                            <TextBlock Text="{Binding JogStepXY, StringFormat='현재: {0:F1}mm'}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#1D4ED8"/>
+                        </WrapPanel>
+
+                        <WrapPanel Margin="0,0,0,8" VerticalAlignment="Center">
+                            <TextBlock Text="Z Step(mm):" VerticalAlignment="Center" Width="85" FontWeight="SemiBold" Foreground="#334155"/>
+                            <Button Content="0.001" Width="52" Margin="0,0,4,0" Style="{StaticResource LavenderActionButton}" Click="BtnStepZ_Click" Tag="0.001"/>
+                            <Button Content="0.010" Width="52" Margin="0,0,4,0" Style="{StaticResource LavenderActionButton}" Click="BtnStepZ_Click" Tag="0.010"/>
+                            <Button Content="0.100" Width="52" Margin="0,0,4,0" Style="{StaticResource LavenderActionButton}" Click="BtnStepZ_Click" Tag="0.100"/>
+                            <Button Content="1.000" Width="52" Margin="0,0,8,0" Style="{StaticResource LavenderActionButton}" Click="BtnStepZ_Click" Tag="1.000"/>
+                            <TextBlock Text="{Binding JogStepZ, StringFormat='현재: {0:F3}mm'}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#6D28D9"/>
+                        </WrapPanel>
+
+                        <UniformGrid Columns="3" Rows="2" Margin="0,0,0,6">
+                            <Button Content="◀ X - (Left)" Margin="2" Height="32" Style="{StaticResource SoftActionButton}" Click="BtnJog_Click" Tag="X:-1"/>
+                            <Button Content="▲ Y - (Rear)" Margin="2" Height="32" Style="{StaticResource SoftActionButton}" Click="BtnJog_Click" Tag="Y:-1"/>
+                            <Button Content="🔼 Z - (Up 상승)" Margin="2" Height="32" Style="{StaticResource LavenderActionButton}" Click="BtnJog_Click" Tag="Z:-1"/>
+                            <Button Content="▶ X + (Right)" Margin="2" Height="32" Style="{StaticResource SoftActionButton}" Click="BtnJog_Click" Tag="X:1"/>
+                            <Button Content="▼ Y + (Front)" Margin="2" Height="32" Style="{StaticResource SoftActionButton}" Click="BtnJog_Click" Tag="Y:1"/>
+                            <Button Content="🔽 Z + (Down 하강)" Margin="2" Height="32" Style="{StaticResource LavenderActionButton}" Click="BtnJog_Click" Tag="Z:1"/>
+                        </UniformGrid>
+
+                        <UniformGrid Columns="2">
+                            <Button Content="🏠 전 축 HOME 원점 복귀" Margin="2" Height="32" Style="{StaticResource MintActionButton}" Click="BtnHomeAll_Click"/>
+                            <Button Content="{Binding ZBrakeStatusText}" Margin="2" Height="32" Style="{StaticResource AmberActionButton}" Click="BtnToggleBrake_Click"/>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2. CAS CI-600A 로드셀 인디케이터 (07-2_141116_CI600A_KOR_UM.pdf 사양 반영) -->
+                <Border Style="{StaticResource PastelCardStyle}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,6">
+                            <TextBlock Text="⚖ CAS CI-600A 로드셀 (RS-232C Modbus-RTU &amp; Relay)" FontSize="14" FontWeight="Bold" Foreground="#1E293B"/>
+                            <Border Background="{Binding LoadCellBadgeBg}" CornerRadius="4" Padding="8,2" HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding LoadCellStatusText}" Foreground="{Binding LoadCellBadgeFg}" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </DockPanel>
+
+                        <TextBlock Text="매뉴얼(CI600A_KOR_UM p.56~73): COM1(9600, 8-N-1), Menu-2207=9(MODBUS-RTU), CN2 Relay OUT1->DI4 / OUT2->DI5"
+                                   FontSize="10.5" Foreground="#64748B" Margin="0,0,0,8" TextWrapping="Wrap"/>
+
+                        <!-- Modbus 레지스터 실시간 상태 -->
+                        <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,0,0,8">
+                            <UniformGrid Columns="2" Rows="2">
+                                <TextBlock Text="{Binding Ci600ModbusGrossReg}" FontSize="11.5" FontWeight="SemiBold" Foreground="#334155" Margin="2"/>
+                                <TextBlock Text="{Binding Ci600ModbusNetReg}" FontSize="11.5" FontWeight="Bold" Foreground="#1D4ED8" Margin="2"/>
+                                <TextBlock Text="{Binding Ci600ModbusAdcReg}" FontSize="11.5" Foreground="#475569" Margin="2"/>
+                                <TextBlock Text="{Binding Ci600ModbusSpReg}" FontSize="11.5" FontWeight="SemiBold" Foreground="#047857" Margin="2"/>
+                            </UniformGrid>
+                        </Border>
+
+                        <!-- 하중 시뮬레이션 슬라이더 (SP1 15g -> DI4 ON / SP2 30g -> DI5 ON & Z축 자동상승 테스트) -->
+                        <DockPanel Margin="0,0,0,6">
+                            <TextBlock Text="하중 인가 테스트(g):" Width="115" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#334155"/>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding CurrentLoadGram, StringFormat='{}{0:F1} g'}" Width="55" TextAlignment="Right" FontWeight="Bold" Foreground="#DC2626" VerticalAlignment="Center"/>
+                            <Slider Minimum="0" Maximum="45" TickFrequency="0.5" IsSnapToTickEnabled="True" Value="{Binding CurrentLoadGram, Mode=TwoWay}" VerticalAlignment="Center"/>
+                        </DockPanel>
+
+                        <!-- SP1 / SP2 설정 및 영점/용기 명령 버튼 -->
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="SP1 목표(DI4):" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11.5"/>
+                            <TextBox Grid.Column="1" Text="{Binding CurrentConfig.LoadCellSetPoint1Gram, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Column="2" Text="SP2 상한(DI5):" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11.5"/>
+                            <TextBox Grid.Column="3" Text="{Binding CurrentConfig.LoadCellLimitGram, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}"/>
+                        </Grid>
+
+                        <UniformGrid Columns="3">
+                            <Button Content="0.0g 영점 (01MZ)" Margin="2" Height="30" Style="{StaticResource SoftActionButton}" Click="BtnLoadCellZero_Click"/>
+                            <Button Content="용기 차감 (01MT)" Margin="2" Height="30" Style="{StaticResource SoftActionButton}" Click="BtnLoadCellTare_Click"/>
+                            <Button Content="SP1/SP2 전송(0x10)" Margin="2" Height="30" Style="{StaticResource PrimaryPastelButton}" Click="BtnLoadCellApplySp_Click"/>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 3. EtherCAT 7개 슬레이브 연결 상태 -->
+                <Border Style="{StaticResource PastelCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="🔗 EtherCAT 마스터(PCIe-R0805) 7개 슬레이브 상태" Style="{StaticResource SectionTitleStyle}"/>
+                        <DataGrid ItemsSource="{Binding EtherCatSlaves}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  Style="{StaticResource PastelDataGridStyle}" Height="215">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding NodeId}" Width="35"/>
+                                <DataGridTextColumn Header="DIP" Binding="{Binding DipSwitchHex}" Width="45"/>
+                                <DataGridTextColumn Header="모델명" Binding="{Binding VendorAndModel}" Width="155"/>
+                                <DataGridTextColumn Header="역할" Binding="{Binding RoleDescription}" Width="*"/>
+                                <DataGridTextColumn Header="상태" Binding="{Binding AlState}" Width="65"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 우측: N3ECAT-DB32T 16 DI / 16 DO 실시간 모니터 및 동적 명칭 편집 -->
+        <Border Grid.Column="2" Style="{StaticResource PastelCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="💡 N3ECAT-DB32T (Node 0x04) 16 DI / 16 DO 실시간 점검 &amp; 예비 채널 동적 매핑" FontSize="14" FontWeight="Bold" Foreground="#1E293B"/>
+                        <TextBlock Text="DO 출력 버튼을 클릭하면 즉시 ON/OFF 토글되며, 예비 채널(DI06~16, DO07~16)의 명칭을 현장에서 바로 수정할 수 있습니다."
+                                   FontSize="11" Foreground="#64748B" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button DockPanel.Dock="Right" Content="💾 I/O 명칭 및 설정 저장" Style="{StaticResource MintActionButton}" HorizontalAlignment="Right" Click="BtnSaveIoConfig_Click"/>
+                </DockPanel>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 좌: 16 DI 입력 채널 리스트 -->
+                    <Border Grid.Column="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="📥 Digital Input (DI01 ~ DI16) — 클릭 시 시뮬레이션 신호 반전" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,8"/>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding DiChannels}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="48"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="78"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                                    <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
+                                                    <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
+                                                            BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
+                                                            Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- 우: 16 DO 출력 채널 리스트 -->
+                    <Border Grid.Column="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="📤 Digital Output (DO01 ~ DO16) — 클릭 시 강제 ON/OFF 출력" FontWeight="Bold" Foreground="#047857" Margin="0,0,0,8"/>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding DoChannels}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="48"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="78"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                                    <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
+                                                    <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
+                                                            BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
+                                                            Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+

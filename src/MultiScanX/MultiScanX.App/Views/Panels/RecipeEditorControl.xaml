@@ -1,0 +1,114 @@
+<UserControl x:Class="MultiScanX.App.Views.Panels.RecipeEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="1200" d:DesignHeight="820">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- 상단: 시료 규격 & 행/열/전체 일괄 미세조정(Shift) & Snake 경로 정렬 -->
+            <RowDefinition Height="*"/>
+            <!-- 하단: 10x10 (100pt) 정밀 좌표 편집 DataGrid -->
+        </Grid.RowDefinitions>
+
+        <!-- 상단 제어 카드 -->
+        <Border Grid.Row="0" Style="{StaticResource PastelCardStyle}" Margin="0,0,0,10">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="📐 10×10 (100 Points) 마스터 레시피 편집기 &amp; 행/열/전체 일괄 미세조정 (Shift)" FontSize="14" FontWeight="Bold" Foreground="#1E293B"/>
+                        <TextBlock Text="행(Row 1~10)·열(Col 1~10) 또는 전체(All)를 선택하여 X/Y(0.1mm 단위), Z(0.001mm 단위) 좌표를 일괄 오프셋 이동하거나 개별 셀을 직접 키보드로 수정합니다."
+                                   FontSize="11" Foreground="#64748B" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="🔢 10×10 (100Pt) 격자 생성" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnLoad10x10_Click"/>
+                        <Button Content="🔢 6×5 (30Pt) 격자 생성" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnLoad30Pt_Click"/>
+                        <Button Content="🐍 Snake 최단 경로 자동 정렬" Style="{StaticResource LavenderActionButton}" Margin="0,0,6,0" Click="BtnOptimizeSnake_Click"/>
+                        <Button Content="💾 레시피 저장 (JSON)" Style="{StaticResource MintActionButton}" Click="BtnSaveRecipe_Click"/>
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- 1단: 시료(기판) 메타데이터 입력 바 -->
+                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                    <WrapPanel VerticalAlignment="Center">
+                        <TextBlock Text="레시피명:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <TextBox Text="{Binding CurrentRecipe.RecipeName, UpdateSourceTrigger=PropertyChanged}" Width="210" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,14,0"/>
+
+                        <TextBlock Text="시료 모델:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <TextBox Text="{Binding CurrentRecipe.SampleModelName, UpdateSourceTrigger=PropertyChanged}" Width="130" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,14,0"/>
+
+                        <TextBlock Text="가로 W(mm):" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <TextBox Text="{Binding CurrentRecipe.SubstrateWidth, UpdateSourceTrigger=PropertyChanged}" Width="65" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,12,0"/>
+
+                        <TextBlock Text="세로 H(mm):" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <TextBox Text="{Binding CurrentRecipe.SubstrateHeight, UpdateSourceTrigger=PropertyChanged}" Width="65" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,12,0"/>
+
+                        <TextBlock Text="두께 T(mm):" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <TextBox Text="{Binding CurrentRecipe.SubstrateThickness, UpdateSourceTrigger=PropertyChanged}" Width="65" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,12,0"/>
+
+                        <TextBlock Text="공정 단계:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <TextBox Text="{Binding CurrentRecipe.EtchProcessStage, UpdateSourceTrigger=PropertyChanged}" Width="140" Style="{StaticResource PastelTextBoxStyle}"/>
+                    </WrapPanel>
+                </Border>
+
+                <!-- 2단: 행(Row) / 열(Col) / 전체(All) 일괄 미세조정 (Shift) 툴바 -->
+                <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="6" Padding="10,8">
+                    <DockPanel>
+                        <WrapPanel VerticalAlignment="Center">
+                            <TextBlock Text="🎯 조정 대상:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#1E3A8A" Margin="0,0,6,0"/>
+                            <ComboBox ItemsSource="{Binding RowFilterOptions}" SelectedIndex="{Binding SelectedShiftRowIndex}" Width="125" Margin="0,0,6,0" VerticalContentAlignment="Center"/>
+                            <ComboBox ItemsSource="{Binding ColFilterOptions}" SelectedIndex="{Binding SelectedShiftColIndex}" Width="125" Margin="0,0,14,0" VerticalContentAlignment="Center"/>
+
+                            <TextBlock Text="XY 이동량(mm):" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#1E3A8A" Margin="0,0,6,0"/>
+                            <TextBox Text="{Binding ShiftDeltaMm, UpdateSourceTrigger=PropertyChanged}" Width="55" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,8,0"/>
+
+                            <Button Content="◀ X - 이동" Style="{StaticResource PrimaryPastelButton}" Margin="0,0,4,0" Click="BtnShift_Click" Tag="X:-1"/>
+                            <Button Content="▶ X + 이동" Style="{StaticResource PrimaryPastelButton}" Margin="0,0,8,0" Click="BtnShift_Click" Tag="X:1"/>
+                            <Button Content="▲ Y - 이동" Style="{StaticResource PrimaryPastelButton}" Margin="0,0,4,0" Click="BtnShift_Click" Tag="Y:-1"/>
+                            <Button Content="▼ Y + 이동" Style="{StaticResource PrimaryPastelButton}" Margin="0,0,14,0" Click="BtnShift_Click" Tag="Y:1"/>
+
+                            <TextBlock Text="Z 이동량(mm):" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#6D28D9" Margin="0,0,6,0"/>
+                            <TextBox Text="{Binding ShiftDeltaZMm, UpdateSourceTrigger=PropertyChanged}" Width="60" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,6,0"/>
+                            <Button Content="🔼 Z -" Style="{StaticResource LavenderActionButton}" Margin="0,0,4,0" Click="BtnShift_Click" Tag="Z:-1"/>
+                            <Button Content="🔽 Z +" Style="{StaticResource LavenderActionButton}" Click="BtnShift_Click" Tag="Z:1"/>
+                        </WrapPanel>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding PathOptimizationSummary}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                   FontSize="11.5" FontWeight="Bold" Foreground="#047857" Margin="10,0,0,0"/>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- 하단: 100 Points 정밀 좌표 테이블 -->
+        <Border Grid.Row="1" Style="{StaticResource PastelCardStyle}">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <TextBlock Text="{Binding RecipeSummaryText}" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="🎯 선택 행(Pt) 좌표로 스테이지 이동 (Mode 2)" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnMoveToSelectedRow_Click"/>
+                        <Button Content="⚡ 선택 행(Pt) 단일 측정 (Mode 3)" Style="{StaticResource PrimaryPastelButton}" Click="BtnMeasureSelectedRow_Click"/>
+                    </StackPanel>
+                </DockPanel>
+
+                <DataGrid ItemsSource="{Binding CurrentRecipe.Points}" SelectedItem="{Binding SelectedPoint, Mode=TwoWay}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" Style="{StaticResource PastelDataGridStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header=" 순번(Pt)" Binding="{Binding PointId}" Width="65" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="격자(R/C)" Binding="{Binding GridLabel}" Width="75" IsReadOnly="True"/>
+                        <DataGridCheckBoxColumn Header="측정활성" Binding="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}" Width="65"/>
+                        <DataGridTextColumn Header="X 좌표 (0.1mm)" Binding="{Binding X, StringFormat=F1, UpdateSourceTrigger=PropertyChanged}" Width="110"/>
+                        <DataGridTextColumn Header="Y 좌표 (0.1mm)" Binding="{Binding Y, StringFormat=F1, UpdateSourceTrigger=PropertyChanged}" Width="110"/>
+                        <DataGridTextColumn Header="Target Z (0.001mm)" Binding="{Binding TargetZ, StringFormat=F3, UpdateSourceTrigger=PropertyChanged}" Width="125"/>
+                        <DataGridTextColumn Header="반복횟수" Binding="{Binding RepeatCount, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                        <DataGridCheckBoxColumn Header="MMS PC2 (Cu)" Binding="{Binding EnableMmsCu, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                        <DataGridCheckBoxColumn Header="F20-EXR (Film)" Binding="{Binding EnableF20Film, UpdateSourceTrigger=PropertyChanged}" Width="105"/>
+                        <DataGridCheckBoxColumn Header="CL-3000 (Laser)" Binding="{Binding EnableTtvLaser, UpdateSourceTrigger=PropertyChanged}" Width="105"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

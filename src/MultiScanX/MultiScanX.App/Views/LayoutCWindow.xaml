@@ -1,0 +1,122 @@
+<Window x:Class="MultiScanX.App.Views.LayoutCWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MultiScanX.App.ViewModels"
+        xmlns:panels="clr-namespace:MultiScanX.App.Views.Panels"
+        mc:Ignorable="d"
+        Title="[GUI 초안 C - 미니멀 메인 관제 데스크 + 독립 플로팅 스튜디오형] MultiScan-X Studio (2560×1440 QHD Ready)"
+        Width="1920" Height="1080" MaxWidth="2560" MaxHeight="1440"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        Background="{StaticResource AppBgBrush}">
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- 1. 상단 미니멀 헤더 & 플로팅 스튜디오 팝업 런처 바 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 2. 초대형 원클릭 3단계 시료 로딩 & 측정 액션 카드 -->
+            <RowDefinition Height="*"/>
+            <!-- 3. 미니멀 메인 관제 데스크 (초대형 2D 맵 + 핵심 계기판 & 측정 테이블 + 선택형 우측 슬라이드 드로어) -->
+            <RowDefinition Height="Auto"/>
+            <!-- 4. 하단 상태 표시줄 -->
+        </Grid.RowDefinitions>
+
+        <!-- 1. 상단 미니멀 헤더 & 플로팅 스튜디오 런처 -->
+        <Border Grid.Row="0" Style="{StaticResource PastelCardStyle}" Padding="14,10" Margin="0,0,0,10">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#7C3AED" CornerRadius="6" Padding="10,4" Margin="0,0,10,0">
+                        <TextBlock Text="GUI TYPE C : 미니멀 메인 데스크 + 독립 플로팅 스튜디오형" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                    </Border>
+                    <TextBlock Text="{Binding AppTitleHeader}" FontSize="18" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- 우측: 독립 스튜디오 팝업 창 띄우기 런처 & 해상도/레이아웃 비교 -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="독립 스튜디오 팝업창:" VerticalAlignment="Center" FontSize="11.5" FontWeight="Bold" Foreground="#6D28D9" Margin="0,0,6,0"/>
+                    <Button Content="📐 10×10 레시피 스튜디오 창" Style="{StaticResource LavenderActionButton}" Padding="10,5" Margin="0,0,6,0" Click="BtnPopupRecipe_Click"/>
+                    <Button Content="🛠 H/W &amp; I/O Check 스튜디오 창" Style="{StaticResource LavenderActionButton}" Padding="10,5" Margin="0,0,6,0" Click="BtnPopupIoCheck_Click"/>
+                    <Button Content="⚙ 센서 오프셋/설정 창" Style="{StaticResource LavenderActionButton}" Padding="10,5" Margin="0,0,6,0" Click="BtnPopupConfig_Click"/>
+                    <Button x:Name="BtnToggleDrawer" Content="📌 우측 퀵드로어 열기" Style="{StaticResource SoftActionButton}" Padding="10,5" Margin="0,0,14,0" Click="BtnToggleDrawer_Click"/>
+
+                    <Button Content="2560×1440" Style="{StaticResource SoftActionButton}" Padding="8,4" Margin="0,0,4,0" Click="BtnResQhd_Click"/>
+                    <Button Content="1920×1080" Style="{StaticResource SoftActionButton}" Padding="8,4" Margin="0,0,8,0" Click="BtnResFhd_Click"/>
+
+                    <Button Content="초안 A 열기" Style="{StaticResource SoftActionButton}" Padding="8,4" Margin="0,0,4,0" Click="BtnOpenLayoutA_Click"/>
+                    <Button Content="초안 B 열기" Style="{StaticResource SoftActionButton}" Padding="8,4" Click="BtnOpenLayoutB_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 2. 오퍼레이터 중심 초대형 3단계 시료 로딩 워크플로우 카드 -->
+        <Border Grid.Row="1" Style="{StaticResource PastelCardStyle}" Padding="16,12" Margin="0,0,0,10" Background="#FFFFFF">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 좌측: 큼직한 Step 1 -> Step 2 -> Step 3 버튼 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="STEP 1. 측정준비 (원점/진공OFF)" Width="230" Height="44" FontSize="13" Style="{StaticResource SoftActionButton}" Margin="0,0,8,0" Click="BtnStep1Prepare_Click"/>
+                    <TextBlock Text="━━▶" VerticalAlignment="Center" Foreground="#94A3B8" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <Button Content="{Binding VacuumButtonText}" Width="230" Height="44" FontSize="13" Style="{StaticResource AmberActionButton}" Margin="0,0,8,0" Click="BtnStep2Vacuum_Click"/>
+                    <TextBlock Text="━━▶" VerticalAlignment="Center" Foreground="#94A3B8" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <Button Content="STEP 3. ▶ 자동 계측 시작" Width="220" Height="44" FontSize="13.5" Style="{StaticResource MintActionButton}" Margin="0,0,8,0" Click="BtnStep3Start_Click"/>
+                    <Button Content="■ 즉시 정지" Width="125" Height="44" FontSize="13" Style="{StaticResource CoralActionButton}" Click="BtnStop_Click"/>
+                </StackPanel>
+
+                <!-- 우측: 운전 모드 및 안전 상태 배지 -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <ComboBox ItemsSource="{Binding OperationModes}" SelectedIndex="{Binding SelectedOperationModeIndex}" Width="280" Height="36" VerticalContentAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0"/>
+                    <Border Background="{Binding VacuumBadgeBg}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,8,0">
+                        <TextBlock Text="{Binding VacuumStatusText}" Foreground="{Binding VacuumBadgeFg}" FontWeight="Bold" FontSize="12"/>
+                    </Border>
+                    <Border Background="#DCFCE7" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                        <TextBlock Text="🛡 EMO &amp; Safety OK" Foreground="#15803D" FontWeight="Bold" FontSize="12"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 3. 미니멀 메인 관제 데스크 -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="720"/>
+                <!-- 초대형 2D 스테이지 맵 -->
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+                <!-- 중앙: 4대 핵심 디지털 계기판 + 측정 데이터 & CL-3000 식각 비교 -->
+                <ColumnDefinition x:Name="DrawerCol" Width="0"/>
+                <!-- 우측 선택형 슬라이드 퀵드로어 (평소 0px로 숨김) -->
+            </Grid.ColumnDefinitions>
+
+            <panels:StageMapControl Grid.Column="0"/>
+            <panels:EtchComparisonControl Grid.Column="2"/>
+
+            <!-- 우측 선택형 슬라이드 퀵드로어 (H/W JOG & CI-600A 미니 점검용) -->
+            <Border x:Name="QuickDrawerBorder" Grid.Column="3" Visibility="Collapsed" Margin="12,0,0,0">
+                <panels:IoHardwareCheckControl/>
+            </Border>
+        </Grid>
+
+        <!-- 4. 하단 상태 표시줄 -->
+        <Border Grid.Row="3" Background="#F5F3FF" BorderBrush="#DDD6FE" BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,10,0,0">
+            <DockPanel>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#5B21B6" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="💡 상단 보라색 버튼으로 [레시피], [I/O Check], [센서 오프셋] 창을 QHD 화면 위에 독립 팝업으로 동시에 띄울 수 있습니다."
+                               Foreground="#6D28D9" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                    <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Width="240" Height="16" Foreground="#7C3AED" Background="#EDE9FE"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
+

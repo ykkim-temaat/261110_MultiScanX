@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -6,19 +7,21 @@
     <UseWPF>true</UseWPF>
     <LangVersion>latest</LangVersion>
     <RootNamespace>MultiScanX.App</RootNamespace>
-    <AssemblyName>MultiScanX.App</AssemblyName>
-    <!-- [Build-Time Version & Release Note SSOT]
-      v1.0.3 : 빌드 코멘트(Description) 및 버전 이력 관리 연동
-      v1.0.2 : system_config.json 연동 및 버전 동적 바인딩 적용
-      v1.0.1 : 측정 중지 버튼 분리 및 HW EMO 배지 추가
-      v1.0.0 : 최초 Inno Setup 인스톨러 배포
-    -->
-    <Version>1.0.3</Version>
-    <Description>빌드 코멘트(Description) 및 버전 이력 관리 연동</Description>
+    <GuiLayout Condition="'$(GuiLayout)' == ''">Default</GuiLayout>
+    <AssemblyName Condition="'$(GuiLayout)' == 'Default'">MultiScanX.App</AssemblyName>
+    <AssemblyName Condition="'$(GuiLayout)' == 'A'">MultiScanX_LayoutA_RibbonTab</AssemblyName>
+    <AssemblyName Condition="'$(GuiLayout)' == 'B'">MultiScanX_LayoutB_SideDock</AssemblyName>
+    <AssemblyName Condition="'$(GuiLayout)' == 'C'">MultiScanX_LayoutC_FloatingStudio</AssemblyName>
+    <DefineConstants Condition="'$(GuiLayout)' == 'A'">$(DefineConstants);LAYOUT_A</DefineConstants>
+    <DefineConstants Condition="'$(GuiLayout)' == 'B'">$(DefineConstants);LAYOUT_B</DefineConstants>
+    <DefineConstants Condition="'$(GuiLayout)' == 'C'">$(DefineConstants);LAYOUT_C</DefineConstants>
+    <Version>1.1.0</Version>
+    <Description>GUI 3종 레이아웃(A/B/C) 파스텔 라이트 테마(2560x1440 QHD) 및 CI-600A/CNT2/10x10 레시피 통합 구현</Description>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\MultiScanX.Core\MultiScanX.Core.csproj" />
     <ProjectReference Include="..\MultiScanX.Hardware\MultiScanX.Hardware.csproj" />
   </ItemGroup>
-</Project>
 
+</Project>

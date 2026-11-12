@@ -1,6 +1,6 @@
 # MultiScanX 프로젝트 현황 요약 (K社 박막두께 자동계측 시스템)
 
-* **최종 업데이트 일자:** 2026-11-11
+* **최종 업데이트 일자:** 2026-11-12
 * **주관 부서:** TeMaat 기술연구소
 * **상태:** 기구/전장 설계 완료 ➔ 아진엑스텍 EtherCAT 제어 솔루션(PCIe 마스터 + 슬레이브 3종) 벤치 테스트 및 S/W 개발 단계
 * **원격 저장소:** `git@github.com:ykkim-temaat/261110_MultiScanX.git`
@@ -11,6 +11,8 @@
 
 | 버전 (Rev) | 개정/수정 일자 | 작성자 / 부서 | 주요 개정 및 수정 내용 |
 | :---: | :---: | :---: | :--- |
+| **Rev 1.7** | 2026-11-12 | TeMaat 기술연구소 | • `2560×1440 (QHD)` 권장 해상도 및 파스텔 라이트 테마 기반 **GUI 3종 레이아웃 비교용 .NET 8 WPF 실행 파일 3종(`Layout A/B/C`, v1.1.0)** 구현 및 **초안 C(미니멀 메인 관제 데스크 + 독립 플로팅 스튜디오 팝업형) 최종 확정**<br/>• `CAS CI-600A` 공식 매뉴얼(`07-2_141116_CI600A_KOR_UM.pdf`) 기반 RS-232C Modbus-RTU(`Menu-2207=9`, `40008~40061`) 및 릴레이 비교출력(`OUT1->DI4`, `OUT2->DI5` 과부하 자동상승) 반영<br/>• `CNT2`/`DB32T` 동적 I/O 점검, `10×10` 레시피 행/열 미세조정(`Shift`) & Snake 최단경로 정렬, `ethercat_bench_test.ps1` 파나소닉 서보 2축 스캔 보강 |
+| **Rev 1.6** | 2026-11-12 | TeMaat 기술연구소 | • 소프트웨어 기능 정의 체크리스트(`261111-02`) 사용자 구상 반영 완료 및 종합 개발 계획서 초안(`261112-01`) 수립<br/>• 2단계 분리 개발 전략(Phase 1: 3축 갠트리/스케일/로드셀 제어 ➔ Phase 2: 사급 계측기 3종 통합) 및 파스텔 라이트 GUI 아키텍처 확정<br/>• Z축 다중 조건 우선순위 정지(위치/DI접점/RS-232C Modbus 무게), 3종 센서 3D 오프셋 자동 보상, 동적 I/O 매핑 설계 |
 | **Rev 1.5** | 2026-11-11 | TeMaat 기술연구소 | • Inno Setup 6 정식 인스톨러(`MultiScanX_Installer.iss`) 및 Dual-Track 빌드 파이프라인 구축/IPC 설치 검증<br/>• Build-Time 버전 SSOT(`.csproj` `<Version>`) 및 Run-Time 설정(`SystemConfig` / `system_config.json`) 분리 적용(v1.0.2)<br/>• 개발/시운전용 PowerShell 명령어 치트시트(`261111-01`) 작성 |
 | **Rev 1.4** | 2026-11-10 | TeMaat 기술연구소 | • C# .NET WPF 제어 S/W 단일 EXE 빌드 파이프라인(`src/build_deploy.ps1`) 구축 및 220KB 초경량 배포 실증 완료<br/>• 전장 안전 규격(IEC 60204-1/SEMI S2) 준수: 소프트웨어 조작 버튼 `측정 중지(Stop Scan)` 분리 및 `HW EMO` 감시 인디케이터 신설<br/>• IPC 실물 모니터 1:1 실시간 화면 미러링을 위한 VNC(TightVNC Server + RealVNC Viewer) 가이드 수립 |
 | **Rev 1.3** | 2026-11-10 | TeMaat 기술연구소 | • `부품발주 검토_261109.xlsx` 내 단일화된 `부품발주_Panasonic` 시트 기준으로 BOM SSOT 최종 동기화 완료<br/>• 산업용 PC(Nuvo-9002E) 실물 셋업 및 Hello World 검증 가이드(`261110-06`) 연동 |
@@ -67,6 +69,8 @@
 | **배포** | [MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md](../MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md) | 산업용 제어 PC 표준 셋업 가이드 및 체크리스트 (SOP) |
 | **가이드**| [docs/261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md) | Nuvo-9002E 셋업, OS 튜닝 및 Self-Contained 배포 가이드 |
 | **운영** | [docs/261111-01_개발_시운전_PowerShell_명령어_치트시트.md](./261111-01_개발_시운전_PowerShell_명령어_치트시트.md) | 개발/시운전용 빌드, 패치 및 IPC 원격 점검 명령어 치트시트 |
+| **기획** | [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md) | 제어 소프트웨어 8대 영역 기능 정의 체크리스트 및 구상 시트 (Rev 1.1) |
+| **계획** | [docs/261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md](./261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md) | 사용자 구상 기반 S/W 종합 개발 계획서 (2단계 로드맵 & 변수 해결책) |
 | **설계** | `../01_제작사양 및 설계자료/02-2_MultiSensor-Metrology_261109-1.pdf` | 전장 회로도 원본 CAD 출력 PDF (TM-DWG-260825 Rev. A) |
 | **BOM** | `../01_제작사양 및 설계자료/02-3_부품발주 검토_261109.xlsx` | 부품 발주 및 견적 검토 원본 엑셀 |
 | **매뉴얼**| `../02_데이터시트 및 관련자료/01-1_PCIe-R0805-ECAT-E_HW_KOR_V1.0_20260408.pdf` | 아진엑스텍 EtherCAT 마스터 카드 HW 매뉴얼 |

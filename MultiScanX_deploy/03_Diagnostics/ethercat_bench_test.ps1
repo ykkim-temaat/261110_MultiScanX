@@ -31,6 +31,10 @@ public class AxHwBench {
 
     [DllImport("AXA.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaInfoGetModuleCount(ref int pnModuleCount);
     [DllImport("AXA.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaReadChannelVolts(int nChannelNo, ref double dpVolt);
+
+    [DllImport("AXM.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmInfoGetAxisCount(ref int lpAxisCount);
+    [DllImport("AXM.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmSignalIsServoOn(int lAxisNo, ref uint upOnOff);
+    [DllImport("AXM.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmStatusReadActPos(int lAxisNo, ref double dpPosition);
 }
 "@
 
@@ -65,22 +69,31 @@ try {
 
 # 2. Slave Module Scanning
 Write-Host "`n=================================================================" -ForegroundColor Cyan
-Write-Host " 2. EtherCAT Bus Slave Module Scanning (CNT2, DB32T, AI16)" -ForegroundColor Cyan
+Write-Host " 2. EtherCAT Bus Slave Scanning (Servo Axes, CNT2, DB32T, AI16)" -ForegroundColor Cyan
 Write-Host "=================================================================" -ForegroundColor Cyan
 if ($isRealHw) {
-    $dioCnt = 0; $cntCnt = 0; $aiCnt = 0
+    $axisCnt = 0; $dioCnt = 0; $cntCnt = 0; $aiCnt = 0
+    [AxHwBench]::AxmInfoGetAxisCount([ref]$axisCnt) | Out-Null
     [AxHwBench]::AxdInfoGetModuleCount([ref]$dioCnt) | Out-Null
     [AxHwBench]::AxcInfoGetModuleCount([ref]$cntCnt) | Out-Null
     [AxHwBench]::AxaInfoGetModuleCount([ref]$aiCnt) | Out-Null
 
-    Write-Host "  - DIO Module Count    (N3ECAT-DB32T) : $dioCnt unit(s)" -ForegroundColor White
-    Write-Host "  - Counter Module Count (N3ECAT-CNT2)  : $cntCnt unit(s)" -ForegroundColor White
-    Write-Host "  - AIN Module Count    (N3ECAT-AI16)  : $aiCnt unit(s)" -ForegroundColor White
+    Write-Host "  - Motion Axis Count    (Panasonic A6B) : $axisCnt axis(axes)" -ForegroundColor White
+    for ($ax = 0; $ax -lt $axisCnt; $ax++) {
+        $srvOn = [uint32]0; $actPos = 0.0
+        [AxHwBench]::AxmSignalIsServoOn($ax, [ref]$srvOn) | Out-Null
+        [AxHwBench]::AxmStatusReadActPos($ax, [ref]$actPos) | Out-Null
+        Write-Host "     -> Axis $ax : ServoOn=$srvOn, ActPos=$([math]::Round($actPos, 4))" -ForegroundColor Gray
+    }
+    Write-Host "  - DIO Module Count     (N3ECAT-DB32T)  : $dioCnt unit(s)" -ForegroundColor White
+    Write-Host "  - Counter Module Count (N3ECAT-CNT2)   : $cntCnt unit(s)" -ForegroundColor White
+    Write-Host "  - AIN Module Count     (N3ECAT-AI16)   : $aiCnt unit(s)" -ForegroundColor White
 } else {
     Start-Sleep -Milliseconds 300
-    Write-Host "  - [MOCK] Slave 1 Detected: N3ECAT-CNT2  (2CH High-speed Counter, Node ID: 1)" -ForegroundColor White
-    Write-Host "  - [MOCK] Slave 2 Detected: N3ECAT-DB32T (16DI / 16DO Sink,       Node ID: 2)" -ForegroundColor White
-    Write-Host "  - [MOCK] Slave 3 Detected: N3ECAT-AI16  (16CH Analog Input,     Node ID: 3)" -ForegroundColor White
+    Write-Host "  - [MOCK] Motion Axes Detected: 2 Axes (Axis 0: X Panasonic A6B, Axis 1: Y Panasonic A6B)" -ForegroundColor White
+    Write-Host "  - [MOCK] Slave Detected: N3ECAT-CNT2  (2CH High-speed Counter)" -ForegroundColor White
+    Write-Host "  - [MOCK] Slave Detected: N3ECAT-DB32T (16DI / 16DO Sink)" -ForegroundColor White
+    Write-Host "  - [MOCK] Slave Detected: N3ECAT-AI16  (16CH Analog Input)" -ForegroundColor White
 }
 
 # 3. DO Sequential Blink (Walking 1s) Test

@@ -1,0 +1,145 @@
+<UserControl x:Class="MultiScanX.App.Views.Panels.StageMapControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="640" d:DesignHeight="760">
+    <Border Style="{StaticResource PastelCardStyle}">
+        <DockPanel>
+            <!-- 상단 헤더 및 빠른 좌표 제어 바 -->
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="🗺 510×515mm 포러스 척 2D 스테이지 맵 (10×10 Grid &amp; 실시간 헤드 추적)"
+                               FontSize="14" FontWeight="Bold" Foreground="#1E293B"/>
+                    <TextBlock Text="포인트를 클릭하면 선택되며, [선택 좌표 이동(Mode 2)] 또는 [단일점 측정(Mode 3)]을 즉시 수행할 수 있습니다."
+                               FontSize="11" Foreground="#64748B" Margin="0,2,0,0"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="🎯 선택 좌표 이동 (Mode 2)" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnMoveToSelected_Click"/>
+                    <Button Content="⚡ 단일점 즉시 측정 (Mode 3)" Style="{StaticResource PrimaryPastelButton}" Click="BtnMeasureSelected_Click"/>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- 하단 현재 선택 포인트 및 3축 실시간 좌표 요약 바 -->
+            <Border DockPanel.Dock="Bottom" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <WrapPanel Grid.Column="0" VerticalAlignment="Center">
+                        <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                            <TextBlock FontSize="12" FontWeight="Bold" Foreground="#1D4ED8">
+                                <Run Text="X (Gantry): "/>
+                                <Run Text="{Binding CurrXFormatted, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Border>
+                        <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                            <TextBlock FontSize="12" FontWeight="Bold" Foreground="#047857">
+                                <Run Text="Y (Porous Chuck): "/>
+                                <Run Text="{Binding CurrYFormatted, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Border>
+                        <Border Background="#F5F3FF" BorderBrush="#DDD6FE" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                            <TextBlock FontSize="12" FontWeight="Bold" Foreground="#6D28D9">
+                                <Run Text="Z (CNT2 50nm): "/>
+                                <Run Text="{Binding CurrZFormatted, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Border>
+                        <TextBlock VerticalAlignment="Center" FontSize="12" Foreground="#334155" FontWeight="SemiBold">
+                            <Run Text="선택 Pt: #"/>
+                            <Run Text="{Binding SelectedPoint.PointId, FallbackValue=1}"/>
+                            <Run Text=" ("/>
+                            <Run Text="{Binding SelectedPoint.GridLabel, FallbackValue=R1C1, Mode=OneWay}"/>
+                            <Run Text=" | X="/>
+                            <Run Text="{Binding SelectedPoint.X, StringFormat=F1, FallbackValue=25.0}"/>
+                            <Run Text=", Y="/>
+                            <Run Text="{Binding SelectedPoint.Y, StringFormat=F1, FallbackValue=25.0}"/>
+                            <Run Text=")"/>
+                        </TextBlock>
+                    </WrapPanel>
+                    <Button Grid.Column="1" Content="🔆 F20 Zero Cal 실행" Style="{StaticResource LavenderActionButton}" Padding="10,4" Click="BtnF20ZeroCal_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- 중앙 510x515mm 스테이지 캔버스 (Viewbox로 해상도 자동 스케일링) -->
+            <Border Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="6">
+                <Viewbox Stretch="Uniform">
+                    <Canvas Width="560" Height="560" Background="#FFFFFF">
+                        <!-- 외곽 포러스 척 베이스 -->
+                        <Rectangle Canvas.Left="10" Canvas.Top="7" Width="530" Height="535"
+                                   Stroke="#94A3B8" StrokeThickness="1.5" StrokeDashArray="4 2" Fill="#F8FAFC" RadiusX="6" RadiusY="6"/>
+
+                        <!-- 510 x 515 mm 시료(기판) 영역 -->
+                        <Rectangle Canvas.Left="20" Canvas.Top="17" Width="510" Height="515"
+                                   Stroke="#3B82F6" StrokeThickness="2" Fill="#EFF6FF" Opacity="0.65"/>
+
+                        <!-- 보조 격자선 (100mm 간격) -->
+                        <Line X1="120" Y1="17" X2="120" Y2="532" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="220" Y1="17" X2="220" Y2="532" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="320" Y1="17" X2="320" Y2="532" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="420" Y1="17" X2="420" Y2="532" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="20" Y1="117" X2="530" Y2="117" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="20" Y1="217" X2="530" Y2="217" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="20" Y1="317" X2="530" Y2="317" Stroke="#DBEAFE" StrokeThickness="1"/>
+                        <Line X1="20" Y1="417" X2="530" Y2="417" Stroke="#DBEAFE" StrokeThickness="1"/>
+
+                        <TextBlock Canvas.Left="28" Canvas.Top="22" Text="POROUS VACUUM CHUCK (510.0 × 515.0 mm | Vacuum Zone DI2)"
+                                   Foreground="#1D4ED8" FontSize="11" FontWeight="Bold"/>
+
+                        <!-- F20-EXR Reference Si Wafer Zero Cal 지그 위치 표시 -->
+                        <Border Canvas.Left="512" Canvas.Top="22" Background="#F5F3FF" BorderBrush="#8B5CF6" BorderThickness="1.5" CornerRadius="10" Padding="5,2"
+                                ToolTip="Filmetrics F20-EXR Reference Si Wafer Zero Calibration Stage Position">
+                            <TextBlock Text="★ F20 Cal" FontSize="9" FontWeight="Bold" Foreground="#6D28D9"/>
+                        </Border>
+
+                        <!-- 레시피 포인트 ItemsControl (10x10 또는 30pt) -->
+                        <ItemsControl ItemsSource="{Binding CurrentRecipe.Points}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas Width="560" Height="560"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                    <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- 기판 시작 오프셋 (+20, +17) 보정 -->
+                                    <Button Click="PointPin_Click" Tag="{Binding}" Cursor="Hand"
+                                            Margin="10,7,0,0" Background="Transparent" BorderThickness="0"
+                                            ToolTip="{Binding GridLabel}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid Width="22" Height="22">
+                                                    <Ellipse Stroke="#2563EB" StrokeThickness="1.5" Fill="#DBEAFE"/>
+                                                    <TextBlock Text="{Binding PointId}" FontSize="8.5" FontWeight="Bold"
+                                                               Foreground="#1E3A8A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- 현재 3종 센서 헤드 실시간 위치 마커 (Crosshair) -->
+                        <Canvas Canvas.Left="{Binding HeadCanvasLeft}" Canvas.Top="{Binding HeadCanvasTop}" IsHitTestVisible="False">
+                            <Ellipse Width="20" Height="20" Stroke="#DC2626" StrokeThickness="2.5" Fill="#44EF4444"/>
+                            <Line X1="10" Y1="-4" X2="10" Y2="24" Stroke="#DC2626" StrokeThickness="1.5"/>
+                            <Line X1="-4" Y1="10" X2="24" Y2="10" Stroke="#DC2626" StrokeThickness="1.5"/>
+                            <Border Canvas.Left="22" Canvas.Top="-4" Background="#DC2626" CornerRadius="4" Padding="4,1">
+                                <TextBlock Text="HEAD (PC2/F20/CL3000)" Foreground="White" FontSize="8.5" FontWeight="Bold"/>
+                            </Border>
+                        </Canvas>
+                    </Canvas>
+                </Viewbox>
+            </Border>
+        </DockPanel>
+    </Border>
+</UserControl>
+

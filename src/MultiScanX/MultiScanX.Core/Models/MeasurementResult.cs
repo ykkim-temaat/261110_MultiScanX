@@ -8,11 +8,12 @@ namespace MultiScanX.Core.Models
     public class MeasurementPointResult
     {
         public int PointId { get; set; }
+        public string GridLabel { get; set; } = "R1C1";
         public double TargetX { get; set; }
         public double TargetY { get; set; }
         public double ActualX { get; set; }
         public double ActualY { get; set; }
-        public double ActualZ { get; set; } // Renishaw 50nm 리니어 스케일 계측값
+        public double ActualZ { get; set; } // Renishaw 50nm 리니어 스케일 계측값 (0.001mm 표시)
 
         // 1. Thick Cu 두께 (Fischer MMS PC2)
         public double CuThicknessUm { get; set; }
@@ -21,11 +22,15 @@ namespace MultiScanX.Core.Models
         public double FilmThicknessNm { get; set; }
         public double FilmGoodnessOfFit { get; set; } // GOF (0.0 ~ 1.0)
 
-        // 3. TTV 변위 (Keyence Laser)
+        // 3. TTV / 단차 변위 (Keyence CL-3000) 및 식각 전/후 비교
         public double TtvDeltaUm { get; set; }
+        public double PreEtchHeightUm { get; set; }
+        public double PostEtchHeightUm { get; set; }
+        public double EtchDepthDeltaUm => Math.Round(PreEtchHeightUm - PostEtchHeightUm, 2);
 
-        // 4. 프로브 접촉 하중 (CAS Load Cell)
+        // 4. 프로브 접촉 하중 (CAS CI-600A Load Cell)
         public double ContactLoadG { get; set; }
+        public string StopTriggerSource { get; set; } = "DI4(SP1)";
 
         public bool IsPass { get; set; } = true;
         public string Note { get; set; } = "OK";
@@ -58,4 +63,3 @@ namespace MultiScanX.Core.Models
         public bool OverallJudgement { get; set; } = true;
     }
 }
-

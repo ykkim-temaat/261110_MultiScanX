@@ -200,7 +200,7 @@
 
 ---
 
-## 📅 [2026-11-11] 세션 4 (10:20 ~ 11:25)
+## 📅 [2026-11-11] 세션 4 (10:20 ~ 11:48)
 
 ### 1. 작업 개요
 * **주요 목표:**
@@ -222,6 +222,8 @@
    * `v1.0.2` 전체 빌드 (`MultiScanX_Setup_v1.0.2.exe` 2.08 MB) 및 `C:\MultiScanX\config\system_config.json` 자동 생성 확인
    * 사용자 요청에 따라 [MultiScanX.App.csproj](../src/MultiScanX/MultiScanX.App/MultiScanX.App.csproj)에 `<Version>1.0.3</Version>` 및 `<Description>`(빌드 코멘트) SSOT 추가, [`MainViewModel`](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) 부팅 로그 및 [build_deploy.ps1](../src/build_deploy.ps1) 빌드 출력 연동 완료
    * `.\src\build_deploy.ps1 -PatchOnly` 실행 검증: `MultiScanX.App.exe` (232.6 KB, `FileVersion: 1.0.3.0`, `Comments` 필드 매핑) 및 정상 부팅(`Alive=True`) 확인
+4. **소프트웨어 기능 정의 체크리스트 작성 (`261111-02`):**
+   * [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md) 생성 (권한/모드, UI/IO Check, 모션/정렬, 3종 계측기, 시퀀스, 안전/알람, 레시피/데이터, 외부연동 8대 영역 구성)
 
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
@@ -234,11 +236,66 @@
 | [src/MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss) | `#ifndef MyAppVersion` 커맨드라인 버전 전달 버그 수정 |
 | [src/build_deploy.ps1](../src/build_deploy.ps1) | `.csproj` 버전 자동 파싱 및 Dual-Track 패키징 스크립트 |
 | [docs/261111-01_개발_시운전_PowerShell_명령어_치트시트.md](./261111-01_개발_시운전_PowerShell_명령어_치트시트.md) | 개발 노트북 및 IPC 테스트/배포 PowerShell 명령어 모음 |
+| [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md) | S/W 8대 영역 기능 정의 체크리스트 및 사용자 구상 기입 템플릿 |
 
 ### 4. 다음 세션 시작 시 즉시 착수할 작업 (Next Action Items)
 - [ ] **1. (최우선) CNT2(고속 카운터/스케일), DIO(DB32T 입력/출력), AI(AI16 아날로그/로드셀) 등 하드웨어 점검용 I/O Check 화면(탭 또는 전용 창) 설계 및 구현**
 - [ ] **2. IPC에서 아진 드라이버(`Setup.exe`) 설치, 재부팅 및 `ethercat_bench_test.ps1` / I/O Check 화면으로 실물 슬레이브 연동 테스트**
 - [x] ~~v1.0.3 초경량 패치 EXE(`src\Release_Bin\MultiScanX.App.exe`) IPC `C:\MultiScanX\bin\` 덮어쓰기 후 실행 확인 (`[v1.0.3]`, 코멘트 로그, `system_config.json` 로드 검증 완료)~~
+
+---
+
+## 📅 [2026-11-12] 세션 5 (11:51 ~ 진행 중)
+
+### 1. 작업 개요
+* **주요 목표:**
+  1. 사용자가 [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md)에 직접 기입한 8대 영역 구상 및 결정사항 정밀 분석
+  2. 다양한 현장 변수와 예외 상황을 해결하는 구체적 아키텍처가 담긴 **소프트웨어 종합 개발 계획서 초안([docs/261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md](./261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md)) 신규 작성**
+
+### 2. 세부 작업 및 처리 내역
+1. **체크리스트(`261111-02`) 사용자 구상 전수 분석 및 Rev 1.1 갱신:**
+   * 장비 정체성(실험실 품질평가·연구용 계측기), 밝은 파스텔 톤 GUI 선호, 사고 방지형 비밀번호 잠금/자동 복귀 정책 확인
+   * 실물 하드웨어 특성 반영: 포러스 척(Y축) + X/Z 갠트리(3종 센서 일체형), CNT2(Z축 리니어스케일 전용), CI-600A 로드셀(DI4/DI5 비교접점 + RS-232C Modbus RTU 무게 통신), 동적 DI/DO/AI 매핑 요구사항 파악
+   * 사급 계측기 3종 미입고 상태에 맞춘 **2단계 분리 개발 전략(Phase 1: 3축 갠트리·스케일·로드셀 제어 ➔ Phase 2: 계측기 통합)** 수립
+2. **종합 개발 계획서 초안(`261112-01`) 작성 완료:**
+   * 5+1 단계 운전 모드(Virtual Sim / Mode 1~5) 정의
+   * 파스텔 라이트 컬러 팔레트 및 **3종 GUI 레이아웃 초안(초안 A/B/C) 비교 매트릭스** 제시
+   * **6대 핵심 변수별 공학적 해결책 설계:**
+     1. 3종 센서 모듈의 3차원($\Delta X, \Delta Y, \Delta Z$) 기구 오프셋 자동 보상 및 Soft Limit 사전 검증
+     2. Z축 2단 하강(Fast ➔ Creep) 및 다중 조건(`CNT2 위치` / `DI4 접점` / `Modbus 무게`) 우선순위 정지 & 과부하(`DI5` / `>Limit`) 자동 상승 알고리즘
+     3. 동적 DI/DO/AI 매핑(`io_map.json`) 및 EtherCAT 딥스위치/파라미터 관리
+     4. 포러스 척 시료 로딩/진공 워크플로우(`준비➔진공➔시작`) 및 F20-EXR 수동/자동 Zero Calibration 시퀀스
+     5. `10×10`(확장형) 인터랙티브 레시피 편집기(행/열/전체 드래그 & 키보드 `0.1/0.001mm`) 및 최적 경로(Snake/TSP) 알고리즘
+     6. CL-3000 식각(연마) 전·후 비교 데이터 구조, SQLite 로컬 DB 및 알람 로그 1년 자동 삭제 정책
+3. **CAS CI-600A 공식 매뉴얼(`07-2_141116_CI600A_KOR_UM.pdf`, `07-3_CI-600+Relay.pdf`) 분석 및 GUI 3종 레이아웃(`.NET 8 WPF`) 비교 실행 파일 3개 구현 완료 (`v1.1.0`):**
+   * **CI-600A 통신/릴레이 사양 반영:** `COM1`(9600 bps, 8-N-1), `Menu-2207=9`(MODBUS-RTU, `40008~40009` 총중량, `40010~40011` 순중량, `40014~40015` ADC 200Hz, `40017~40020` SP1/SP2), `CN2` 릴레이 카드 `OUT1`(`SP1=15g` ➔ 아진 `DI4` 연동) 및 `OUT2`(`SP2=30g` 과부하 ➔ 아진 `DI5` 연동 및 Z축 즉시 자동 상승 인터록) 구현
+   * **파스텔 라이트 테마(`Themes/PastelLightTheme.xaml`) 및 5대 공통 기능 패널 구현 (`2560×1440` QHD 권장 해상도 최적화):**
+     * `StageMapControl`: `510×515mm` 포러스 척 2D 인터랙티브 스테이지 맵 (`10×10` 격자 클릭 선택, 헤드 실시간 위치 추적, Mode 2 이동 / Mode 3 단일점 측정 / F20 Zero Cal 실행)
+     * `IoHardwareCheckControl`: EtherCAT 7 슬레이브 테이블, 3축 수동 JOG (`0.1mm`/`0.001mm`), 파스텍 브레이크 토글, `CNT2` Renishaw 50nm 카운터, `CI-600A` 로드셀 하중 테스트 슬라이더 및 Modbus/영점/용기 제어, `DB32T` 16DI/16DO 실시간 토글 및 예비 채널 동적 명칭 편집
+     * `RecipeEditorControl`: `10×10 (100Pt)` / `6×5 (30Pt)` 생성, 행(`Row 1~10`)/열(`Col 1~10`)/전체 일괄 미세조정(`Shift`), Snake 최단 이동 경로 자동 정렬
+     * `SystemConfigControl`: 비밀번호(`0000`) 잠금/해제, 3종 센서(`CL-3000`, `MMS PC2`, `F20-EXR`) 3D 오프셋($\Delta X, \Delta Y, \Delta Z$), Z축 접촉 정지 우선순위(1~3순위), F20 Zero Cal 좌표 설정
+     * `EtchComparisonControl`: 4대 핵심 계측 카드 및 CL-3000 식각 전/후 단차($\Delta H = \text{Pre} - \text{Post}$) 비교 테이블
+   * **3종 GUI 레이아웃 독립 실행 파일(`.exe`) 빌드, 기동 검증 및 최종 확정:**
+     1. `MultiScanX_LayoutA_RibbonTab.exe` (초안 A: 상단 워크플로우 리본 탭 표준형)
+     2. `MultiScanX_LayoutB_SideDock.exe` (초안 B: 좌측 사이드바 + 중앙 2D 맵 상시 고정 도킹형)
+     3. **`MultiScanX_LayoutC_FloatingStudio.exe` (초안 C: 미니멀 메인 관제 데스크 + 독립 플로팅 스튜디오 팝업형) ➔ 사용자 검토 후 메인 GUI로 최종 채택 (`App.xaml.cs` 기본값 반영)**
+   * **`ethercat_bench_test.ps1` 보강:** 기존 3종 I/O 모듈 외 파나소닉 서보 X/Y 2축(`AxmInfoGetAxisCount`, `AxmSignalIsServoOn`, `AxmStatusReadActPos`) 인식 진단 추가
+
+### 3. 주요 생성 및 변경 산출물 목록
+| 파일 경로 | 설명 |
+| :--- | :--- |
+| [docs/261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md](./261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md) | 사용자 구상 기반 S/W 종합 개발 계획서 초안 (GUI 3안 비교, 변수별 해결책, 2단계 로드맵) |
+| [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md) | 8대 영역 구상 완료 상태 반영 (Rev 1.1) |
+| [src/MultiScanX/MultiScanX.App/Themes/PastelLightTheme.xaml](../src/MultiScanX/MultiScanX.App/Themes/PastelLightTheme.xaml) | 2560×1440 QHD 대응 파스텔 라이트 실험실 계측기 테마 리소스 |
+| [src/MultiScanX/MultiScanX.App/Views/LayoutAWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/LayoutAWindow.xaml) | GUI 초안 A (상단 리본 탭 표준형) 메인 윈도우 |
+| [src/MultiScanX/MultiScanX.App/Views/LayoutBWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/LayoutBWindow.xaml) | GUI 초안 B (좌측 내비게이션 + 중앙 2D 맵 상시 고정 도킹형) 메인 윈도우 |
+| [src/MultiScanX/MultiScanX.App/Views/LayoutCWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/LayoutCWindow.xaml) | **GUI 초안 C (최종 채택: 미니멀 메인 관제 데스크 + 독립 플로팅 스튜디오형)** 메인 윈도우 |
+| [MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1](../MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1) | EtherCAT 파나소닉 서보 2축 + CNT2 + DB32T + AI16 통합 인식 진단 스크립트 |
+| [docs/project_status.md](./project_status.md) | 프로젝트 현황판 Rev 1.7 최신화 |
+
+### 4. 다음 작업 (Next Action Items)
+- [ ] **1. IPC(`Nuvo-9002E`)에서 `EzConfig UC` 및 `ethercat_bench_test.ps1`을 통해 EtherCAT 연결(파나소닉 서보 X/Y 2대, CNT2, DB32T, AI16) 인식 상태 검증**
+- [ ] **2. 채택된 GUI 초안 C를 기준으로 아진 AXL 실물 드라이버(`CAXM`/`CAXD`/`CAXC`) 및 CI-600A RS-232C 실물 시리얼 포트 연동 테스트**
 
 
 
