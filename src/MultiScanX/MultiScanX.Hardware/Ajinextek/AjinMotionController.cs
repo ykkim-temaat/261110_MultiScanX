@@ -69,7 +69,7 @@ namespace MultiScanX.Hardware.Ajinextek
         {
             if (!_isInitialized) return 0.0;
             double pos = 0.0;
-            CAXM.AxmStatusReadActPos(axis, ref pos);
+            CAXM.AxmStatusGetActPos(axis, ref pos);
             return pos;
         }
 
@@ -125,7 +125,7 @@ namespace MultiScanX.Hardware.Ajinextek
             if (!_isInitialized) return 0.0;
             double count = 0.0;
             // N3ECAT-CNT2 채널 0 (Renishaw 50nm 리니어 스케일)
-            CAXC.AxcStatusReadCount(0, ref count);
+            CAXC.AxcStatusGetActPos(0, ref count);
             return count * 0.00005; // 1 count = 50nm = 0.00005mm
         }
     }

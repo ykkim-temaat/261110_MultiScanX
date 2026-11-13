@@ -42,15 +42,15 @@ public class AxHwBench {
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdiReadInportWord(int nModuleNo, int nOffset, ref uint upValue);
 
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcInfoGetModuleCount(ref int pnModuleCount);
-    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcStatusReadCount(int nChannelNo, ref double dpCount);
-    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcStatusSetCount(int nChannelNo, double dCount);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcStatusGetActPos(int lChannelNo, ref double dbpActPos);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcStatusSetActPos(int lChannelNo, double dbActPos);
 
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaInfoGetModuleCount(ref int pnModuleCount);
-    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaReadChannelVolt(int nChannelNo, ref double dpVolt);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaiSwReadVoltage(int lChannelNo, ref double dpVolt);
 
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmInfoGetAxisCount(ref int lpAxisCount);
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmSignalIsServoOn(int lAxisNo, ref uint upOnOff);
-    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmStatusReadActPos(int lAxisNo, ref double dpPosition);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmStatusGetActPos(int nAxisNo, ref double dpPos);
 }
 "@
 
@@ -98,7 +98,7 @@ if ($isRealHw) {
     for ($ax = 0; $ax -lt $axisCnt; $ax++) {
         $srvOn = [uint32]0; $actPos = 0.0
         [AxHwBench]::AxmSignalIsServoOn($ax, [ref]$srvOn) | Out-Null
-        [AxHwBench]::AxmStatusReadActPos($ax, [ref]$actPos) | Out-Null
+        [AxHwBench]::AxmStatusGetActPos($ax, [ref]$actPos) | Out-Null
         Write-Host "     -> Axis $ax : ServoOn=$srvOn, ActPos=$([math]::Round($actPos, 4))" -ForegroundColor Gray
     }
     Write-Host "  - DIO Module Count     (N3ECAT-DB32T)  : $dioCnt unit(s)" -ForegroundColor White
@@ -145,7 +145,7 @@ Write-Host " 5. N3ECAT-CNT2 High-speed Counter 2CH Read & Reset Test" -Foregroun
 Write-Host "=================================================================" -ForegroundColor Cyan
 if ($isRealHw) {
     $count = 0.0
-    [AxHwBench]::AxcStatusReadCount(0, [ref]$count) | Out-Null
+    [AxHwBench]::AxcStatusGetActPos(0, [ref]$count) | Out-Null
     $distMm = [math]::Round($count * 0.00005, 4)
     Write-Host "  - CH0 (Renishaw Scale) Current Count: $count pulses (~$distMm mm)" -ForegroundColor White
 } else {
@@ -160,7 +160,7 @@ Write-Host "=================================================================" -
 if ($isRealHw) {
     for ($ch = 0; $ch -lt 4; $ch++) {
         $volt = 0.0
-        [AxHwBench]::AxaReadChannelVolt($ch, [ref]$volt) | Out-Null
+        [AxHwBench]::AxaiSwReadVoltage($ch, [ref]$volt) | Out-Null
         Write-Host "  - AI CH $ch : $([math]::Round($volt, 3)) V" -ForegroundColor White
     }
 } else {

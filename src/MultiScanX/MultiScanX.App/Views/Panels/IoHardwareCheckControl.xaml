@@ -5,6 +5,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignWidth="1500" d:DesignHeight="880">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="465"/>
@@ -171,6 +174,9 @@
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="{Binding IoLockButtonText}" Background="{Binding AdminLockBadgeBg}" Foreground="{Binding AdminLockBadgeFg}"
+                                BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11.5" Padding="10,5" Margin="0,0,6,0" Cursor="Hand"
+                                Click="BtnToggleIoLock_Click"/>
                         <Button Content="🔌 AXL 실물 재연결/스캔" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnReconnectAxl_Click"/>
                         <Button Content="💾 I/O·AI·CNT2 설정 저장" Style="{StaticResource MintActionButton}" Click="BtnSaveIoConfig_Click"/>
                     </StackPanel>
@@ -225,7 +231,9 @@
                                                                     <ColumnDefinition Width="74"/>
                                                                 </Grid.ColumnDefinitions>
                                                                 <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" FontSize="11.5" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Padding="5,2" Margin="4,0,8,0"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                                         IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                         Style="{StaticResource PastelTextBoxStyle}" Padding="5,2" Margin="4,0,8,0"/>
                                                                 <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
                                                                         BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Padding="4,2" Cursor="Hand"
                                                                         Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
@@ -254,7 +262,9 @@
                                                                     <ColumnDefinition Width="74"/>
                                                                 </Grid.ColumnDefinitions>
                                                                 <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" FontSize="11.5" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Padding="5,2" Margin="4,0,8,0"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                                         IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                         Style="{StaticResource PastelTextBoxStyle}" Padding="5,2" Margin="4,0,8,0"/>
                                                                 <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
                                                                         BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Padding="4,2" Cursor="Hand"
                                                                         Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
@@ -333,19 +343,47 @@
                                                     </Grid.ColumnDefinitions>
 
                                                     <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding HardwareCapNote}" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center"/>
-                                                    <TextBox Grid.Column="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,8,0"/>
+                                                    <Grid Grid.Column="1" Margin="0,0,6,0">
+                                                        <ComboBox ItemsSource="{Binding DataContext.AiDipSwitchOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                  SelectedItem="{Binding DipSwitchMode, Mode=TwoWay}"
+                                                                  Visibility="{Binding SupportsCurrentDip, Converter={StaticResource BoolToVis}}"
+                                                                  IsEnabled="{Binding DataContext.IsAdminUnlocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                  Height="26" FontSize="10.5"/>
+                                                        <TextBlock Text="CH5~16 (V 전용)" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding SupportsCurrentDip}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                    <TextBox Grid.Column="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                             Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,8,0"/>
                                                     <ComboBox Grid.Column="3" ItemsSource="{Binding DataContext.AiSignalModeOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                              SelectedItem="{Binding SignalMode, Mode=TwoWay}" Height="26" FontSize="11" Margin="0,0,8,0"/>
+                                                              SelectedItem="{Binding SignalMode, Mode=TwoWay}"
+                                                              IsEnabled="{Binding DataContext.IsAdminUnlocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                              Height="26" FontSize="11" Margin="0,0,8,0"/>
 
                                                     <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,8,0">
                                                         <TextBlock Text="{Binding RawFormatted}" FontWeight="Bold" Foreground="#1D4ED8" FontSize="11.5"/>
                                                         <ProgressBar Value="{Binding GaugePercent, Mode=OneWay}" Maximum="100" Height="6" Foreground="#3B82F6" Background="#E2E8F0" Margin="0,2,0,0"/>
                                                     </StackPanel>
 
-                                                    <TextBox Grid.Column="5" Text="{Binding Scale, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Right" Margin="2,0"/>
-                                                    <TextBox Grid.Column="6" Text="{Binding Offset, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Right" Margin="2,0"/>
-                                                    <TextBox Grid.Column="7" Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Center" Margin="2,0"/>
+                                                    <TextBox Grid.Column="5" Text="{Binding Scale, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                             Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Right" Margin="2,0"/>
+                                                    <TextBox Grid.Column="6" Text="{Binding Offset, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                             Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Right" Margin="2,0"/>
+                                                    <TextBox Grid.Column="7" Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                             Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Center" Margin="2,0"/>
 
                                                     <Border Grid.Column="8" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="5" Padding="6,3" Margin="4,0,0,0">
                                                         <TextBlock Text="{Binding ConvertedFormatted}" FontWeight="Bold" Foreground="#047857" FontSize="11.5" TextAlignment="Right" VerticalAlignment="Center"/>

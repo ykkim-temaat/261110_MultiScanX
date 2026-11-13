@@ -34,6 +34,7 @@ namespace MultiScanX.Core.Models
         public int ChannelIndex { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public string DipSwitchMode { get; set; } = "OFF: 전압(V)";
         public string SignalMode { get; set; } = "Voltage (-10~+10V)";
         public double Scale { get; set; } = 1.0;
         public double Offset { get; set; } = 0.0;

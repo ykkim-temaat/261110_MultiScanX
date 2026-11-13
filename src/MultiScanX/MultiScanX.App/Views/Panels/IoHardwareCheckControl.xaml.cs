@@ -97,6 +97,57 @@ namespace MultiScanX.App.Views.Panels
             }
         }
 
+        private void BtnToggleIoLock_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainViewModel vm) return;
+            if (vm.IsAdminUnlocked)
+            {
+                vm.IsAdminUnlocked = false;
+                return;
+            }
+
+            // 비밀번호 입력 팝업 창
+            var dlg = new Window
+            {
+                Title = "엔지니어 편집 잠금 해제",
+                Width = 340,
+                Height = 175,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = Window.GetWindow(this),
+                ResizeMode = ResizeMode.NoResize
+            };
+            var sp = new StackPanel { Margin = new Thickness(16) };
+            sp.Children.Add(new TextBlock
+            {
+                Text = "I/O·AI·CNT2 명칭 및 스케일 편집을 위해\n엔지니어 비밀번호를 입력하세요. (기본: 0000)",
+                Margin = new Thickness(0, 0, 0, 10),
+                FontSize = 12
+            });
+            var pwBox = new PasswordBox { Height = 28, Padding = new Thickness(6, 4, 6, 4), Margin = new Thickness(0, 0, 0, 12) };
+            sp.Children.Add(pwBox);
+
+            var btnOk = new Button { Content = "🔓 잠금 해제", Height = 30, IsDefault = true };
+            btnOk.Click += (_, _) =>
+            {
+                if (pwBox.Password == vm.CurrentConfig.AdminPassword)
+                {
+                    vm.IsAdminUnlocked = true;
+                    dlg.DialogResult = true;
+                    dlg.Close();
+                }
+                else
+                {
+                    MessageBox.Show("비밀번호가 일치하지 않습니다.", "인증 실패", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    pwBox.Clear();
+                    pwBox.Focus();
+                }
+            };
+            sp.Children.Add(btnOk);
+            dlg.Content = sp;
+            pwBox.Focus();
+            dlg.ShowDialog();
+        }
+
         private void BtnReconnectAxl_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is MainViewModel vm)

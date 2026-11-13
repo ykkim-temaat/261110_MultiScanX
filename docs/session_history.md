@@ -374,19 +374,24 @@
      * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
    * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
    * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
+5. **아진 공식 API 교정, 엔지니어 편집 잠금, AI DIP 스위치 UI 및 문서 소급 현행화 (`v1.2.3`):**
+   * **공식 API 교정 (`AXM.cs`/`AXC.cs`/`AXA.cs` 검증):** IPC에서 조회한 아진 공식 C# 래퍼 시그니처에 맞춰 [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs), [AjinMotionController.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AjinMotionController.cs), [MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs), [ethercat_bench_test.ps1](../MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1)의 미존재 함수(`AxmStatusReadActPos`, `AxcStatusReadCount`, `AxaReadChannelVolt`)를 정품 함수(`AxmStatusGetActPos`, `AxcStatusGetActPos`, `AxcStatusSetActPos`, `AxaiSwReadVoltage`, `AxcTriggerSetNotchPos` 등)로 전면 교체 완료.
+   * **엔지니어 편집 잠금 & AI DIP 스위치 UI:** `IoHardwareCheckControl` 상단에 `[🔒 편집 잠금 (PW 해제)]` (기본 PW `0000`, 5분 자동 잠금) 적용 및 `AI16 CH1~4` 전면 DIP 스위치(`OFF: 전압(V)` / `ON: 전류(mA)`) 선택 UI 추가 (`v1.2.3` 빌드: `MultiScanX.App.exe` 380.1 KB, `MultiScanX_Setup_v1.2.3.exe` 2.11 MB, 기동 검증 통과).
+   * **규칙 및 배포/셋업 문서 소급 현행화:** [.agents/AGENTS.md](../.agents/AGENTS.md)(상충 시 기존 문서 소급 현행화 규칙 추가), [00_IPC_셋업_체크리스트_SOP.md](../MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md)(Rev 1.5), [02_Drivers/README.md](../MultiScanX_deploy/02_Drivers/README.md), [261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md)(Rev 1.6) 업데이트 완료.
 
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
 | :--- | :--- |
 | `../03_소프트웨어 개발/MultiScanX_GUI_디자인검토용_배포패키지_v1.1.0.zip` | 일반 관리자 PC 검토용 GUI 3종 비교 실행 파일 + 런타임 자동설치 패키지 (2.84 MB) |
-| [src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs) | `CAXL`, `CAXM`, `CAXD`, `CAXA`, `CAXC` 통합 `AXL.dll` P/Invoke 래퍼 |
+| [src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs) | `CAXL`, `CAXM`, `CAXD`, `CAXA`, `CAXC` 통합 `AXL.dll` 정품 P/Invoke 래퍼 |
 | [src/MultiScanX/MultiScanX.Hardware/Ajinextek/AjinDigitalIO.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AjinDigitalIO.cs) | `N3ECAT-DB32T` 실물 16-bit Word(`0x6000`/`0x7010`) 및 Bit 입출력 제어기 |
-| [src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs](../src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs) | `AiChannelConfig` 16채널 모델 및 `CNT2` Low-Level 파라미터 설정 모델 추가 |
-| [src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) | `50ms` 실시간 AXL 하드웨어 폴링, `AI16` 스케일링, `CNT2` Low-Level 제어 구현 |
-| [src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml](../src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml) | 3단 서브탭(`DB32T DIO` / `AI16 16CH` / `CNT2 Low-Level`) 및 JOG 0점 리셋 UI |
+| [src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs](../src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs) | `AiChannelConfig`(`DipSwitchMode`) 및 `CNT2` Low-Level 파라미터 설정 모델 |
+| [src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) | `50ms` 실시간 AXL 폴링(`AxaiSwReadVoltage`/`AxcStatusGetActPos`), 엔지니어 편집 잠금, `CNT2` 제어 |
+| [src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml](../src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml) | 3단 서브탭(`DB32T`/`AI16 DIP 선택`/`CNT2`), 엔지니어 잠금 버튼, JOG 0점 리셋 UI |
+| [docs/261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md) | `v1.2.3`, 64비트 `AXL.dll` 자동 탐색, `.bat` 원클릭 진단 기준 Rev 1.6 현행화 |
 
 ### 4. 다음 작업 (Next Action Items)
-- [ ] **1. 산업용 PC(`Nuvo-9002E`)에 `v1.2.0` 실행 파일 배포 후, `EzConfig` OP 상태에서 `[🛠 H/W & I/O Check 스튜디오 창]`을 열어 실물 `DB32T`, `AI16`, `CNT2` 실시간 입출력 및 0점 Preset 연동 확인**
+- [ ] **1. 산업용 PC(`Nuvo-9002E`)에 `v1.2.3` 실행 파일 및 최신 `02_EtherCAT_벤치테스트_실행.bat` 적용 후, `AxmStatusGetActPos`/`AxcStatusGetActPos`/`AxaiSwReadVoltage` 실물 연동 최종 확인**
 - [ ] **2. 파나소닉 서보(`MINAS-A6B` X/Y축) 및 파스텍 스텝(`Ezi-SERVO II Plus-E` Z축) 실물 JOG 구동 파라미터 연동**
 
 

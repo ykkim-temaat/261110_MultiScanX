@@ -78,7 +78,10 @@ namespace MultiScanX.Hardware.Ajinextek
         public static extern int AxmStatusReadInMotion(int lAxisNo, ref uint upInMotion);
 
         [DllImport(DllName)]
-        public static extern int AxmStatusReadActPos(int lAxisNo, ref double dpPosition);
+        public static extern uint AxmStatusGetActPos(int nAxisNo, ref double dpPos);
+
+        [DllImport(DllName)]
+        public static extern uint AxmStatusSetActPos(int nAxisNo, double dPos);
 
         [DllImport(DllName)]
         public static extern int AxmStatusReadCmdPos(int lAxisNo, ref double dpPosition);
@@ -133,77 +136,67 @@ namespace MultiScanX.Hardware.Ajinextek
 
     /// <summary>
     /// 아날로그 입력 모듈 API (N3ECAT-AI16: 16CH 16-bit, CH1~4 전압/전류 스위치 선택, CH5~16 전압 전용)
+    /// 공식 헤더: C:\Program Files (x86)\EzSoftware UC\AXL(Library)\C#\AXA.cs 검증 완료
     /// </summary>
     public static class CAXA
     {
         private const string DllName = "AXL.dll";
 
         [DllImport(DllName)]
-        public static extern int AxaInfoIsAIOModule(ref uint upStatus);
+        public static extern uint AxaInfoIsAIOModule(ref uint upStatus);
 
         [DllImport(DllName)]
         public static extern int AxaInfoGetModuleCount(ref int lpModuleCount);
 
         [DllImport(DllName)]
-        public static extern int AxaInfoGetInputCount(int lModuleNo, ref int lpChannelCount);
+        public static extern uint AxaiSetTriggerMode(int lModuleNo, uint uTriggerMode);
 
         [DllImport(DllName)]
-        public static extern int AxaSetRange(int lChannelNo, double dMinVolt, double dMaxVolt);
-
-        [DllImport(DllName)]
-        public static extern int AxaGetRange(int lChannelNo, ref double dpMinVolt, ref double dpMaxVolt);
-
-        [DllImport(DllName)]
-        public static extern int AxaReadChannelVolt(int lChannelNo, ref double dpVolt);
-
-        [DllImport(DllName)]
-        public static extern int AxaReadChannelDigit(int lChannelNo, ref uint upDigit);
+        public static extern uint AxaiSwReadVoltage(int lChannelNo, ref double dpVolt);
     }
 
     /// <summary>
     /// 고속 카운터 모듈 API (N3ECAT-CNT2: Product Code 0x00000902, 2CH 28-bit Counter &amp; Position Trigger)
+    /// 공식 헤더: C:\Program Files (x86)\EzSoftware UC\AXL(Library)\C#\AXC.cs 검증 완료
     /// </summary>
     public static class CAXC
     {
         private const string DllName = "AXL.dll";
 
         [DllImport(DllName)]
-        public static extern int AxcInfoIsCNTModule(ref uint upStatus);
+        public static extern uint AxcInfoIsCNTModule(ref uint upStatus);
 
         [DllImport(DllName)]
         public static extern int AxcInfoGetModuleCount(ref int lpModuleCount);
 
         [DllImport(DllName)]
-        public static extern int AxcStatusReadCount(int lChannelNo, ref double dpCount);
+        public static extern uint AxcStatusGetActPos(int lChannelNo, ref double dbpActPos);
 
         [DllImport(DllName)]
-        public static extern int AxcStatusSetCount(int lChannelNo, double dCount);
+        public static extern uint AxcStatusSetActPos(int lChannelNo, double dbActPos);
 
         [DllImport(DllName)]
-        public static extern int AxcSignalSetEncInputMethod(int lChannelNo, uint uMethod);
+        public static extern uint AxcSignalSetEncInputMethod(int lChannelNo, uint dwMethod);
 
         [DllImport(DllName)]
-        public static extern int AxcSignalGetEncInputMethod(int lChannelNo, ref uint upMethod);
+        public static extern uint AxcSignalGetEncInputMethod(int lChannelNo, ref uint dwpUpMethod);
 
         [DllImport(DllName)]
-        public static extern int AxcSignalSetEncReverse(int lChannelNo, uint uReverse);
+        public static extern uint AxcSignalSetEncReverse(int lChannelNo, uint dwReverse);
 
         [DllImport(DllName)]
-        public static extern int AxcSignalGetEncReverse(int lChannelNo, ref uint upReverse);
+        public static extern uint AxcSignalGetEncReverse(int lChannelNo, ref uint dwpReverse);
 
         [DllImport(DllName)]
-        public static extern int AxcCounterSetMultiplier(int lChannelNo, uint uMultiplier);
+        public static extern uint AxcTriggerSetFunction(int lChannelNo, uint dwMode);
 
         [DllImport(DllName)]
-        public static extern int AxcTriggerSetCompPosition(int lChannelNo, double dPosition);
+        public static extern uint AxcTriggerSetNotchEnable(int lChannelNo, uint dwUsage);
 
         [DllImport(DllName)]
-        public static extern int AxcTriggerSetTime(int lChannelNo, double dTrigTime);
+        public static extern uint AxcTriggerSetNotchPos(int lChannelNo, double dbLowerPos, double dbUpperPos);
 
         [DllImport(DllName)]
-        public static extern int AxcTriggerSetLevel(int lChannelNo, uint uLevel);
-
-        [DllImport(DllName)]
-        public static extern int AxcTriggerEnable(int lChannelNo, uint uOnOff);
+        public static extern uint AxcTriggerSetOutput(int lChannelNo, uint dwOutVal);
     }
 }

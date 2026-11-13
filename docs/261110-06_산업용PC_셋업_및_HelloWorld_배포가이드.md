@@ -1,7 +1,7 @@
 # 산업용 PC(Nuvo-9002E) 셋업 및 MultiScanX 빌드·배포 가이드
 
 * **문서 번호:** `261110-06`
-* **작성 일자:** 2026-11-11 (최초 2026-11-10)
+* **작성 일자:** 2026-11-13 (최초 2026-11-10)
 * **주관 부서:** TeMaat 기술연구소
 * **대상 기종:** Neousys Nuvo-9002E-BMI5 (산업용 제어 PC) & 개발 노트북
 * **참조 도면/BOM:** [261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md](./261110-03_MultiSensor-Metrology_부품발주검토_및_BOM_명세서.md)
@@ -12,6 +12,7 @@
 
 | 버전 (Rev) | 개정/수정 일자 | 작성자 / 부서 | 주요 변경 내역 (Change Description) |
 | :---: | :---: | :---: | :--- |
+| **Rev 1.6** | 2026-11-13 | TeMaat 기술연구소 | • **`v1.2.3` 사양 현행화:** 본체 크기(`~380.1 KB`), 정식 인스톨러(`MultiScanX_Setup_v1.2.3.exe`, `2.11 MB`) 반영<br/>• **64비트 `AXL.dll` 단일 통합 아키텍처 반영:** `EzSoftware UC` 64비트 경로 자동 탐색/등록(`SetDllDirectory`) 및 `AXM.cs`/`AXC.cs`/`AXA.cs` 공식 API 검증 절차 추가<br/>• **PowerShell 보안정책 우회 런처:** `.bat` 원클릭 실행기(`01_IPC_시스템진단_실행.bat`, `02_EtherCAT_벤치테스트_실행.bat`) 수록 |
 | **Rev 1.5** | 2026-11-11 | TeMaat 기술연구소 | • **이원화(Dual-Track) 빌드·배포 체계 반영:** `src\build_deploy.ps1`을 이용한 정식 인스톨러(`MultiScanX_Setup_v1.0.0.exe`) 및 고속 패치용 220KB 본체 분리 가이드 신설<br/>• **개발 환경 최신화:** `Antigravity IDE + .NET 8 SDK + Inno Setup 6` 기준 정비<br/>• **1:1 화면 미러링:** TightVNC Server + RealVNC Viewer 구성 및 영문 표준 진단 반영 |
 | **Rev 1.4** | 2026-11-10 | TeMaat 기술연구소 | • 실무 기준 셋업 순서 전면 재정비: [Step 1] SSH/WinSCP 개설 ➔ [Step 2] D:\TeMaat 업로드 ➔ [Step 3] 런타임/드라이버 설치 ➔ [Step 4] 앱 구동<br/>• 수동 디렉토리 생성 제거 ➔ C# .NET 앱 최초 실행 시 디렉토리 자체 자동 생성(Auto-Provisioning) 명세화 |
 | **Rev 1.3** | 2026-11-10 | TeMaat 기술연구소 | • SSH 설치 후 필수 재부팅 및 가장 확실한 netsh 방화벽 개방 명령어 반영 |
@@ -51,8 +52,8 @@
 ```mermaid
 flowchart LR
     SRC["C# 소스코드 수정\n(src/MultiScanX/)"] --> CMD["터미널 실행\n.\\src\\build_deploy.ps1"]
-    CMD --> T1["[Track 1: 고속 테스트용]\nsrc\\Release_Bin\\MultiScanX.App.exe\n(220.6 KB 초경량 본체)"]
-    CMD --> T2["[Track 2: 정식 Setup 인스톨러]\nMultiScanX_deploy\\04_App_Release\\\nMultiScanX_Setup_v1.0.0.exe (2.08 MB)"]
+    CMD --> T1["[Track 1: 고속 테스트용]\nsrc\\Release_Bin\\MultiScanX.App.exe\n(~380.1 KB 초경량 본체)"]
+    CMD --> T2["[Track 2: 정식 Setup 인스톨러]\nMultiScanX_deploy\\04_App_Release\\\nMultiScanX_Setup_v1.2.3.exe (~2.11 MB)"]
 ```
 
 ### (2) 상황별 실행 명령어 (Antigravity IDE 터미널)
@@ -62,15 +63,15 @@ flowchart LR
    .\src\build_deploy.ps1
    ```
    * **자동 결과:**
-     * `src\Release_Bin\MultiScanX.App.exe` (220.6 KB) 생성
-     * Inno Setup 6가 자동 컴파일되어 **`MultiScanX_deploy\04_App_Release\MultiScanX_Setup_v1.0.0.exe`** 가 배포 폴더 안에 자동 생성됩니다.
-   * *(버전 번호 변경 배포 시: `.\src\build_deploy.ps1 -Version 1.0.1`)*
+     * `src\Release_Bin\MultiScanX.App.exe` (~380.1 KB) 생성
+     * Inno Setup 6가 자동 컴파일되어 **`MultiScanX_deploy\04_App_Release\MultiScanX_Setup_v1.2.3.exe`** 가 배포 폴더 안에 자동 생성됩니다.
+   * *(버전 번호 변경 배포 시: `.\src\build_deploy.ps1 -Version 1.2.4`)*
 
 2. **시운전 중 코드 수정 후 빠른 테스트용 (본체만 2초 만에 생성):**
    ```powershell
    .\src\build_deploy.ps1 -PatchOnly
    ```
-   * **자동 결과:** Setup 마법사를 다시 묶지 않고 **`src\Release_Bin\MultiScanX.App.exe` (220.6 KB)**만 즉시 갱신됩니다.
+   * **자동 결과:** Setup 마법사를 다시 묶지 않고 **`src\Release_Bin\MultiScanX.App.exe` (~380.1 KB)**만 즉시 갱신됩니다.
 
 3. **런타임 미설치 외부 PC용 올인원 패키지 생성 시:**
    ```powershell
@@ -126,20 +127,31 @@ Windows 기본 원격 데스크톱(RDP)은 실물 모니터와 화면이 분리�
 1. **.NET Desktop Runtime 8.0 (x64) 설치 (220KB 초경량 패치 대응):**
    * `01_Runtimes/windowsdesktop-runtime-8.0.33-win-x64.exe` 더블클릭 설치
    * 확인 명령어: `dotnet --list-runtimes` ➔ `Microsoft.WindowsDesktop.App 8.0.x` 확인
-2. **아진엑스텍 EzSoftwareUC 드라이버 설치:**
+2. **아진엑스텍 EzSoftwareUC 드라이버 설치 및 64비트 `AXL.dll` 자동 인식:**
    * `02_Drivers/` 내 `Setup.exe` 우클릭 ➔ **[관리자 권한으로 실행]** ➔ 설치 완료 후 **IPC 1회 재부팅**
-3. **무설치 PowerShell 통합 진단 (100% 영문 표준 로그):**
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ipc_diagnostics.ps1
-   powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ethercat_bench_test.ps1
-   ```
-   * `AXL.dll` 로드 `[PASS]` 및 실물 `N3ECAT-DB32T` 모듈 전면 DO 0~7번 LED 순차 점멸 확인
+   * `EzSoftware UC`는 Motion/DIO/AIO/Counter 함수를 **`AXL.dll` 단일 통합 라이브러리**로 제공하며, 기본 설치 경로인 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit\AXL.dll`을 `MultiScanX.App.exe` 및 진단 스크립트가 자동 탐색·등록(`SetDllDirectory`)합니다.
+3. **무설치 PowerShell 원클릭 통합 진단 (`.bat` 런처 및 API 헤더 검증):**
+   * Windows 기본 보안 정책(`ExecutionPolicy = Restricted`) 우회를 위해 탐색기에서 아래 `.bat` 파일을 더블클릭합니다:
+     * `D:\TeMaat\MultiScanX_deploy\03_Diagnostics\01_IPC_시스템진단_실행.bat`
+     * `D:\TeMaat\MultiScanX_deploy\03_Diagnostics\02_EtherCAT_벤치테스트_실행.bat`
+   * *(PowerShell 직접 실행 시)*:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ipc_diagnostics.ps1
+     powershell -ExecutionPolicy Bypass -File D:\TeMaat\MultiScanX_deploy\03_Diagnostics\ethercat_bench_test.ps1
+     ```
+   * **확인:** 64비트 `AXL.dll` 자동 감지 `[PASS]`, 서보 축·CNT2·DB32T·AI16 실물 스캔 및 DO LED 순차 점멸 확인
+   * **공식 C# 래퍼(`AXM.cs`/`AXC.cs`/`AXA.cs`) 함수명 교차 검증 명령어:**
+     ```powershell
+     Get-ChildItem "C:\Program Files (x86)\EzSoftware UC\AXL(Library)" -Recurse -Include "AXM.cs","AXC.cs","AXA.cs" | ForEach-Object {
+         Select-String -Path $_.FullName -Pattern "ActPos|ReadVoltage|Trigger" | Select-Object -First 20 | ForEach-Object { $_.Line.Trim() }
+     }
+     ```
 
 ---
 
 ### Step 4. 제어 프로그램 정식 설치 및 최초 실행 (`MultiScanX_Setup`)
 1. **정식 인스톨러 설치:**
-   * `D:\TeMaat\MultiScanX_deploy\04_App_Release\MultiScanX_Setup_v1.0.0.exe` 더블클릭
+   * `D:\TeMaat\MultiScanX_deploy\04_App_Release\MultiScanX_Setup_v1.2.3.exe` 더블클릭
    * 기본 경로(`C:\MultiScanX\`) 및 **[바탕 화면에 바로 가기 아이콘 만들기]** 체크 후 설치
    * **자동 완료 사항:** `C:\MultiScanX\bin\MultiScanX.App.exe` 배치, 바탕화면 `MultiScan-X Studio` 바로가기 생성, 제어판 [프로그램 추가/제거(Uninstall)] 정식 등록
 2. **최초 실행 시 자가 생성(Auto-Provisioning)되는 데이터 디렉토리:**
@@ -152,7 +164,7 @@ Windows 기본 원격 데스크톱(RDP)은 실물 모니터와 화면이 분리�
 
 1. **노트북:** `.\src\build_deploy.ps1 -PatchOnly` 실행 (2초 소요 ➔ `src\Release_Bin\MultiScanX.App.exe` 갱신)
 2. **IPC 앱 종료:** 실행 중인 `MultiScan-X Studio` 창 닫기
-3. **고속 복사 (0.1초):** WinSCP로 노트북 `src\Release_Bin\MultiScanX.App.exe` (220 KB)만 IPC의 **`C:\MultiScanX\bin\`**에 덮어쓰기
+3. **고속 복사 (0.1초):** WinSCP로 노트북 `src\Release_Bin\MultiScanX.App.exe` (~380 KB)만 IPC의 **`C:\MultiScanX\bin\`**에 덮어쓰기
 4. **즉시 재실행:** IPC 바탕화면의 **`MultiScan-X Studio`** 아이콘 더블클릭!
 
 ---

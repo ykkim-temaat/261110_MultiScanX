@@ -92,6 +92,7 @@ namespace MultiScanX.App.ViewModels
     public class AiChannelViewModel : INotifyPropertyChanged
     {
         private string _name = string.Empty;
+        private string _dipSwitchMode = "OFF: 전압(V)";
         private string _signalMode = "Voltage (-10~+10V)";
         private double _rawValue = 0.0;
         private double _scale = 1.0;
@@ -102,6 +103,24 @@ namespace MultiScanX.App.ViewModels
         public string Code { get; set; } = string.Empty;
         public bool SupportsCurrentDip => Index <= 4;
         public string HardwareCapNote => SupportsCurrentDip ? "CH1~4 (V/I DIP)" : "CH5~16 (V 전용)";
+
+        public string DipSwitchMode
+        {
+            get => _dipSwitchMode;
+            set
+            {
+                _dipSwitchMode = value;
+                OnPropertyChanged();
+                if (SupportsCurrentDip && value.Contains("ON") && !_signalMode.Contains("mA"))
+                {
+                    SignalMode = "Current (-20~+20mA, CH1~4 DIP ON)";
+                }
+                else if (SupportsCurrentDip && value.Contains("OFF") && _signalMode.Contains("mA"))
+                {
+                    SignalMode = "Voltage (-10~+10V)";
+                }
+            }
+        }
 
         public string Name
         {
@@ -374,6 +393,12 @@ namespace MultiScanX.App.ViewModels
             "Current (-20~+20mA, CH1~4 DIP ON)"
         };
 
+        public ObservableCollection<string> AiDipSwitchOptions { get; } = new ObservableCollection<string>
+        {
+            "OFF: 전압(V)",
+            "ON: 전류(mA)"
+        };
+
         public double CurrX
         {
             get => _currX;
@@ -575,22 +600,31 @@ namespace MultiScanX.App.ViewModels
             set { _pathOptimizationSummary = value; OnPropertyChanged(); }
         }
 
-        // 7. 비밀번호 잠금 보호 상태
+        // 7. 비밀번호 잠금 보호 상태 (편집 잠금 및 5분 자동 잠금)
         private bool _isAdminUnlocked = false;
+        private DateTime _adminUnlockExpireAt = DateTime.MinValue;
         public bool IsAdminUnlocked
         {
             get => _isAdminUnlocked;
             set
             {
                 _isAdminUnlocked = value;
+                if (value)
+                {
+                    _adminUnlockExpireAt = DateTime.Now.AddMinutes(Math.Max(1, CurrentConfig?.AutoLockMinutes ?? 5));
+                }
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsIoEditLocked));
                 OnPropertyChanged(nameof(AdminLockButtonText));
+                OnPropertyChanged(nameof(IoLockButtonText));
                 OnPropertyChanged(nameof(AdminLockBadgeBg));
                 OnPropertyChanged(nameof(AdminLockBadgeFg));
             }
         }
 
+        public bool IsIoEditLocked => !IsAdminUnlocked;
         public string AdminLockButtonText => IsAdminUnlocked ? "🔓 엔지니어 잠금해제됨 (5분 후 자동잠금)" : "🔒 엔지니어 설정 잠금 (PW: 0000)";
+        public string IoLockButtonText => IsAdminUnlocked ? "🔓 편집 허용됨 (잠그기)" : "🔒 편집 잠금 (PW 해제)";
         public string AdminLockBadgeBg => IsAdminUnlocked ? "#DCFCE7" : "#F1F5F9";
         public string AdminLockBadgeFg => IsAdminUnlocked ? "#15803D" : "#475569";
 
@@ -826,6 +860,7 @@ namespace MultiScanX.App.ViewModels
                     Index = i + 1,
                     Code = $"AI{i + 1:D2}",
                     Name = savedAi?.Name ?? def.Name,
+                    DipSwitchMode = savedAi?.DipSwitchMode ?? (def.Mode.Contains("mA") ? "ON: 전류(mA)" : "OFF: 전압(V)"),
                     SignalMode = savedAi?.SignalMode ?? def.Mode,
                     RawValue = def.Raw,
                     Scale = savedAi?.Scale ?? def.Scale,
@@ -898,6 +933,13 @@ namespace MultiScanX.App.ViewModels
         /// </summary>
         private void OnHardwarePollTimerTick(object? sender, EventArgs e)
         {
+            // 엔지니어 잠금 해제 후 설정 시간(5분) 경과 시 자동 잠금 복귀
+            if (IsAdminUnlocked && DateTime.Now >= _adminUnlockExpireAt)
+            {
+                IsAdminUnlocked = false;
+                AddLog("[보안 자동잠금] 설정 시간 만료로 I/O·AI·CNT2 편집 잠금이 자동 활성화되었습니다.");
+            }
+
             if (IsAxlHardwareOnline)
             {
                 try
@@ -932,28 +974,28 @@ namespace MultiScanX.App.ViewModels
                         }
                     }
 
-                    // 2. N3ECAT-AI16 16채널 아날로그 전압 실시간 폴링
+                    // 2. N3ECAT-AI16 16채널 아날로그 전압 실시간 폴링 (공식 AXA.cs: AxaiSwReadVoltage)
                     if (_detectedAiModuleCount > 0)
                     {
                         for (int ch = 0; ch < 16 && ch < AiChannels.Count; ch++)
                         {
                             double volt = 0.0;
-                            if (CAXA.AxaReadChannelVolt(ch, ref volt) == 0)
+                            if (CAXA.AxaiSwReadVoltage(ch, ref volt) == 0)
                             {
                                 AiChannels[ch].RawValue = volt;
                             }
                         }
                     }
 
-                    // 3. N3ECAT-CNT2 2채널 고속 카운터 실시간 폴링 (CH0=Z축 Renishaw 50nm, CH1=Spare)
+                    // 3. N3ECAT-CNT2 2채널 고속 카운터 실시간 폴링 (공식 AXC.cs: AxcStatusGetActPos)
                     if (_detectedCntModuleCount > 0)
                     {
                         double cnt0 = 0.0, cnt1 = 0.0;
-                        if (CAXC.AxcStatusReadCount(0, ref cnt0) == 0)
+                        if (CAXC.AxcStatusGetActPos(0, ref cnt0) == 0)
                         {
                             CurrZ = cnt0 / PulsesPerMm;
                         }
-                        if (CAXC.AxcStatusReadCount(1, ref cnt1) == 0)
+                        if (CAXC.AxcStatusGetActPos(1, ref cnt1) == 0)
                         {
                             int newCh2 = (int)Math.Round(cnt1);
                             if (_cnt2Ch2PulseCount != newCh2)
@@ -1053,7 +1095,7 @@ namespace MultiScanX.App.ViewModels
             {
                 try
                 {
-                    CAXC.AxcStatusSetCount(0, 0.0);
+                    CAXC.AxcStatusSetActPos(0, 0.0);
                 }
                 catch { }
             }
@@ -1076,7 +1118,7 @@ namespace MultiScanX.App.ViewModels
             {
                 try
                 {
-                    CAXC.AxcStatusSetCount(0, targetPulses);
+                    CAXC.AxcStatusSetActPos(0, targetPulses);
                 }
                 catch { }
             }
@@ -1128,10 +1170,8 @@ namespace MultiScanX.App.ViewModels
             {
                 try
                 {
-                    CAXC.AxcTriggerSetTime(0, CurrentConfig.Cnt2TriggerPulseWidthUs);
-                    CAXC.AxcTriggerSetLevel(0, (uint)Math.Clamp(CurrentConfig.Cnt2TriggerLevelIndex, 0, 1));
-                    CAXC.AxcTriggerSetCompPosition(0, compPulses);
-                    CAXC.AxcTriggerEnable(0, IsCnt2TriggerEnabled ? 1u : 0u);
+                    CAXC.AxcTriggerSetNotchPos(0, compPulses - 10, compPulses + 10);
+                    CAXC.AxcTriggerSetNotchEnable(0, IsCnt2TriggerEnabled ? 1u : 0u);
                 }
                 catch { }
             }
@@ -1405,6 +1445,7 @@ namespace MultiScanX.App.ViewModels
                 ChannelIndex = a.Index,
                 Code = a.Code,
                 Name = a.Name,
+                DipSwitchMode = a.DipSwitchMode,
                 SignalMode = a.SignalMode,
                 Scale = a.Scale,
                 Offset = a.Offset,
