@@ -285,6 +285,7 @@
 | 파일 경로 | 설명 |
 | :--- | :--- |
 | [docs/261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md](./261112-01_MultiScanX_소프트웨어_종합_개발계획서_초안.md) | 사용자 구상 기반 S/W 종합 개발 계획서 초안 (GUI 3안 비교, 변수별 해결책, 2단계 로드맵) |
+| [docs/261112-02_MultiScanX_GUI_레이아웃_비교검토_및_최종선정보고서.md](./261112-02_MultiScanX_GUI_레이아웃_비교검토_및_최종선정보고서.md) | GUI 3종 실물 캡처(`docs/images/`) 포함 비교검토 및 초안 C 최종 선정 보고서 |
 | [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md) | 8대 영역 구상 완료 상태 반영 (Rev 1.1) |
 | [src/MultiScanX/MultiScanX.App/Themes/PastelLightTheme.xaml](../src/MultiScanX/MultiScanX.App/Themes/PastelLightTheme.xaml) | 2560×1440 QHD 대응 파스텔 라이트 실험실 계측기 테마 리소스 |
 | [src/MultiScanX/MultiScanX.App/Views/LayoutAWindow.xaml](../src/MultiScanX/MultiScanX.App/Views/LayoutAWindow.xaml) | GUI 초안 A (상단 리본 탭 표준형) 메인 윈도우 |

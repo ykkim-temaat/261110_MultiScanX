@@ -42,6 +42,7 @@ results/
 
 # 대용량 설치 패키지 및 압축 파일 격리 (Git 50MB~100MB 제한 대응 - Rule 09)
 *.zip
+!03_소프트웨어 개발/*.zip
 *.7z
 *.tar.gz
 *.iso
