@@ -21,3 +21,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "$url='https://aka.ms/dot
 echo.
 echo [완료] 설치 마법사가 종료되었습니다. 이제 GUI 실행 파일을 실행해 주세요.
 pause
+

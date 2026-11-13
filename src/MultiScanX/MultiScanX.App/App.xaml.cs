@@ -10,6 +10,14 @@ namespace MultiScanX.App
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            this.DispatcherUnhandledException += (s, exArgs) =>
+            {
+                try { File.WriteAllText(@"C:\MultiScanX\config\last_crash.log", exArgs.Exception.ToString()); } catch { }
+                MessageBox.Show($"[MultiScan-X Studio 실행 오류]\n{exArgs.Exception.Message}\n\n{exArgs.Exception.InnerException?.Message}",
+                    "MultiScan-X Studio Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                exArgs.Handled = true;
+            };
+
             base.OnStartup(e);
 
             // [Auto-Provisioning] 프로그램 최초 실행 시 필요한 데이터/로그/레시피 디렉토리 자동 생성

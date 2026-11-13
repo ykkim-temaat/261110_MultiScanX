@@ -147,5 +147,14 @@
         <Setter Property="ColumnHeaderHeight" Value="32"/>
     </Style>
 
+    <!-- 7. 서브탭 TabItem 파스텔 라이트 스타일 -->
+    <Style x:Key="PastelTabItemStyle" TargetType="TabItem">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="#334155"/>
+        <Setter Property="Padding" Value="14,7"/>
+        <Setter Property="Margin" Value="0,0,6,0"/>
+    </Style>
+
 </ResourceDictionary>
 

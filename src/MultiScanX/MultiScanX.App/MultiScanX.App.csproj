@@ -15,8 +15,8 @@
     <DefineConstants Condition="'$(GuiLayout)' == 'A'">$(DefineConstants);LAYOUT_A</DefineConstants>
     <DefineConstants Condition="'$(GuiLayout)' == 'B'">$(DefineConstants);LAYOUT_B</DefineConstants>
     <DefineConstants Condition="'$(GuiLayout)' == 'C'">$(DefineConstants);LAYOUT_C</DefineConstants>
-    <Version>1.2.0</Version>
-    <Description>디자인 C 기반 실물 DIO(DB32T) 50ms 폴링, AI16(16CH) 스케일링 모니터 및 CNT2(Z-Scale) Low-Level 설정 통합</Description>
+    <Version>1.2.1</Version>
+    <Description>PastelTabItemStyle 리소스 누락 핫픽스 및 실물 DIO(DB32T)·AI16(16CH)·CNT2(Z-Scale) 3단 탭 통합</Description>
   </PropertyGroup>
 
   <ItemGroup>
