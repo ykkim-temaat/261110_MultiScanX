@@ -21,20 +21,20 @@ public class AxHwBench {
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern int AxlClose();
     [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern int AxlIsOpened();
 
-    [DllImport("AXD.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdInfoGetModuleCount(ref int pnModuleCount);
-    [DllImport("AXD.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdoWriteOutportBit(int nModuleNo, int nBitNo, uint uValue);
-    [DllImport("AXD.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdiReadInportWord(int nModuleNo, int nOffset, ref uint upValue);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdInfoGetModuleCount(ref int pnModuleCount);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdoWriteOutportBit(int nModuleNo, int nBitNo, uint uValue);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxdiReadInportWord(int nModuleNo, int nOffset, ref uint upValue);
 
-    [DllImport("AXC.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcInfoGetModuleCount(ref int pnModuleCount);
-    [DllImport("AXC.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcGetCaptureCount(int nChannelNo, ref int plPosition);
-    [DllImport("AXC.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcSetCaptureCount(int nChannelNo, int lPosition);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcInfoGetModuleCount(ref int pnModuleCount);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcStatusReadCount(int nChannelNo, ref double dpCount);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxcStatusSetCount(int nChannelNo, double dCount);
 
-    [DllImport("AXA.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaInfoGetModuleCount(ref int pnModuleCount);
-    [DllImport("AXA.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaReadChannelVolts(int nChannelNo, ref double dpVolt);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaInfoGetModuleCount(ref int pnModuleCount);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxaReadChannelVolt(int nChannelNo, ref double dpVolt);
 
-    [DllImport("AXM.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmInfoGetAxisCount(ref int lpAxisCount);
-    [DllImport("AXM.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmSignalIsServoOn(int lAxisNo, ref uint upOnOff);
-    [DllImport("AXM.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmStatusReadActPos(int lAxisNo, ref double dpPosition);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmInfoGetAxisCount(ref int lpAxisCount);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmSignalIsServoOn(int lAxisNo, ref uint upOnOff);
+    [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)] public static extern uint AxmStatusReadActPos(int lAxisNo, ref double dpPosition);
 }
 "@
 
@@ -128,8 +128,8 @@ Write-Host "`n================================================================="
 Write-Host " 5. N3ECAT-CNT2 High-speed Counter 2CH Read & Reset Test" -ForegroundColor Cyan
 Write-Host "=================================================================" -ForegroundColor Cyan
 if ($isRealHw) {
-    $count = 0
-    [AxHwBench]::AxcGetCaptureCount(0, [ref]$count) | Out-Null
+    $count = 0.0
+    [AxHwBench]::AxcStatusReadCount(0, [ref]$count) | Out-Null
     $distMm = [math]::Round($count * 0.00005, 4)
     Write-Host "  - CH0 (Renishaw Scale) Current Count: $count pulses (~$distMm mm)" -ForegroundColor White
 } else {
@@ -144,7 +144,7 @@ Write-Host "=================================================================" -
 if ($isRealHw) {
     for ($ch = 0; $ch -lt 4; $ch++) {
         $volt = 0.0
-        [AxHwBench]::AxaReadChannelVolts($ch, [ref]$volt) | Out-Null
+        [AxHwBench]::AxaReadChannelVolt($ch, [ref]$volt) | Out-Null
         Write-Host "  - AI CH $ch : $([math]::Round($volt, 3)) V" -ForegroundColor White
     }
 } else {

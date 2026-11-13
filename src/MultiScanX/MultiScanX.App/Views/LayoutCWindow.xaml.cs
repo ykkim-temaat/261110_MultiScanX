@@ -42,7 +42,7 @@ namespace MultiScanX.App.Views
 
         private void BtnPopupIoCheck_Click(object sender, RoutedEventArgs e)
         {
-            ShowStudioPopup("🛠 H/W & I/O Check 스튜디오 — CNT2 / DB32T 16DI·16DO / CAS CI-600A 로드셀", new IoHardwareCheckControl(), 1420, 880);
+            ShowStudioPopup("🛠 H/W & I/O Check 스튜디오 — DB32T (16DI/16DO) / AI16 (16CH 아날로그) / CNT2 (Z-Scale Low-Level) / CI-600A", new IoHardwareCheckControl(), 1560, 900);
         }
 
         private void BtnPopupConfig_Click(object sender, RoutedEventArgs e)

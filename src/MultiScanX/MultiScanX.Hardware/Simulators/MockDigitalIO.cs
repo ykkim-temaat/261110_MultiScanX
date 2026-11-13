@@ -7,17 +7,39 @@ namespace MultiScanX.Hardware.Simulators
     /// </summary>
     public class MockDigitalIO : IDigitalIO
     {
+        private uint _diWord = 0x0001; // DI01 (EMO NC) 기본 ON
+        private uint _doWord = 0x0008; // DO04 (Tower Green) 기본 ON
         private bool _vacZone1;
         private bool _vacZone2;
         private bool _clampFwd;
         private bool _vacRelease;
 
+        public bool IsHardwareConnected => false;
         public bool Initialize() => true;
         public void Shutdown() { }
 
-        public void SetOutputBit(int bitNo, bool value) { }
-        public bool GetOutputBit(int bitNo) => false;
-        public bool GetInputBit(int bitNo) => true;
+        public void SetOutputBit(int bitNo, bool value)
+        {
+            if (bitNo < 0 || bitNo >= 16) return;
+            if (value) _doWord |= (1u << bitNo);
+            else _doWord &= ~(1u << bitNo);
+        }
+
+        public bool GetOutputBit(int bitNo)
+        {
+            if (bitNo < 0 || bitNo >= 16) return false;
+            return (_doWord & (1u << bitNo)) != 0;
+        }
+
+        public bool GetInputBit(int bitNo)
+        {
+            if (bitNo < 0 || bitNo >= 16) return false;
+            return (_diWord & (1u << bitNo)) != 0;
+        }
+
+        public uint GetInputWord() => _diWord;
+        public uint GetOutputWord() => _doWord;
+        public void SetOutputWord(uint wordValue) => _doWord = wordValue & 0xFFFFu;
 
         public void SetVacuumZone1(bool on) => _vacZone1 = on;
         public void SetVacuumZone2(bool on) => _vacZone2 = on;
@@ -31,4 +53,3 @@ namespace MultiScanX.Hardware.Simulators
         public bool IsDoorClosed() => true;
     }
 }
-

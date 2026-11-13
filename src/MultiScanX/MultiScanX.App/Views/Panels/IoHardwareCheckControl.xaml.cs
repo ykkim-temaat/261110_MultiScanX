@@ -86,9 +86,70 @@ namespace MultiScanX.App.Views.Panels
 
         private void BtnToggleIoBit_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is IoBitViewModel bit)
+            if (sender is Button btn && btn.Tag is IoBitViewModel bit && DataContext is MainViewModel vm)
             {
+                // DI 입력 채널은 실물 온라인 모드일 때 AllowDiSimulationOverride가 켜져 있어야만 수동 토글 허용
+                if (!bit.IsOutput && vm.IsAxlHardwareOnline && !vm.AllowDiSimulationOverride)
+                {
+                    return;
+                }
                 bit.IsOn = !bit.IsOn;
+            }
+        }
+
+        private void BtnReconnectAxl_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.TryConnectRealAxlHardware(logOnFail: true);
+            }
+        }
+
+        private async void BtnDoBlinkTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                await vm.RunDoSequentialBlinkTestAsync();
+            }
+        }
+
+        private void BtnCnt2ZeroClear_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.ZeroClearCnt2Scale();
+            }
+        }
+
+        private void BtnCnt2ApplyPreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.ApplyCnt2PresetPosition();
+            }
+        }
+
+        private void BtnCnt2ApplyEncoder_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.ApplyCnt2EncoderConfig();
+            }
+        }
+
+        private void BtnCnt2ToggleTrigger_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.ToggleCnt2PositionTrigger();
+            }
+        }
+
+        private void BtnCnt2OneShot_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.FireCnt2OneShotTrigger();
             }
         }
 
@@ -101,4 +162,3 @@ namespace MultiScanX.App.Views.Panels
         }
     }
 }
-

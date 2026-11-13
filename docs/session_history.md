@@ -295,8 +295,46 @@
 | [docs/project_status.md](./project_status.md) | 프로젝트 현황판 Rev 1.7 최신화 |
 
 ### 4. 다음 작업 (Next Action Items)
-- [ ] **1. IPC(`Nuvo-9002E`)에서 `EzConfig UC` 및 `ethercat_bench_test.ps1`을 통해 EtherCAT 연결(파나소닉 서보 X/Y 2대, CNT2, DB32T, AI16) 인식 상태 검증**
-- [ ] **2. 채택된 GUI 초안 C를 기준으로 아진 AXL 실물 드라이버(`CAXM`/`CAXD`/`CAXC`) 및 CI-600A RS-232C 실물 시리얼 포트 연동 테스트**
+- [x] ~~1. 일반 관리자 PC용 GUI 3종 비교 배포 패키지(`03_소프트웨어 개발/MultiScanX_GUI_디자인검토용_배포패키지_v1.1.0.zip`) 생성 및 Git 커밋/푸시~~
+- [x] ~~2. 디자인 C의 `H/W & I/O Check` 팝업창에 실물 `DB32T` DIO 실시간 폴링, `AI16` 16채널 아날로그 입력 정의/모니터링, `CNT2` Z축 리니어스케일 Low-Level 세팅 UI 통합 (`v1.2.0`)~~
+
+---
+
+## 📅 [2026-11-13] 세션 6 (10:30 ~ 진행 중)
+
+### 1. 작업 개요
+* **주요 목표:**
+  1. 비개발자(일반 관리자) 컴퓨터에서도 GUI 초안 A/B/C를 실행 및 검토할 수 있도록 `03_소프트웨어 개발/MultiScanX_GUI_디자인검토용_배포패키지_v1.1.0.zip` 패키지 압축 배포 및 선행 Git 커밋/푸시(`e9c8ebe`)
+  2. 아진엑스텍 슬레이브 공식 매뉴얼(`03-1_N3ECAT-AI16_AO8_Manual(K)_201504.pdf`, `02-2_N3ECAT_Slave_SW_KOR_V1.1.pdf`) 기반으로 디자인 C의 `H/W & I/O Check` 스튜디오 창을 **3단 서브탭(`DB32T DIO` / `AI16 16CH` / `CNT2 Low-Level`)** 구조로 확장하고 **실물 AXL `50ms(20Hz)` 실시간 폴링 엔진(`v1.2.0`)** 구현
+
+### 2. 세부 작업 및 처리 내역
+1. **일반 관리자 PC용 GUI 디자인 검토 패키지 제작 및 커밋/푸시 (`e9c8ebe`):**
+   * `MultiScanX_LayoutA/B/C.exe` 3종, `MultiScanX_Setup_v1.1.0.exe`, 비교검토 보고서 PDF, `.NET 8 Desktop Runtime` 원클릭 자동설치 배치 스크립트(`00_최초1회_닷넷8런타임_자동설치.bat`) 및 실행 안내문(`README.txt`)을 통합하여 `03_소프트웨어 개발/MultiScanX_GUI_디자인검토용_배포패키지_v1.1.0.zip` (2.84 MB) 생성 완료.
+2. **아진엑스텍 P/Invoke(`AXL.cs`) 및 실물 DIO/AIO/CNT 통합 폴링 엔진 구현 (`v1.2.0`):**
+   * [src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs): 단일 `AXL.dll` 기준으로 `CAXM`, `CAXD`(`AxdiReadInportWord`, `AxdoReadOutportWord`), `CAXA`(`AxaReadChannelVolt`, `AxaSetRange`), `CAXC`(`AxcStatusReadCount`, `AxcStatusSetCount`, `AxcSignalSetEncInputMethod`, `AxcSignalSetEncReverse`, `AxcTrigger*`) 전체 API 선언 보강.
+   * [src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs): `50ms (20Hz)` `DispatcherTimer` 폴링 루프 구축. 실물 `PCIe-R0805-ECAT-E` 연결 시 자동으로 `🟢 AXL Online` 모드로 진입하여 `DB32T` 16-bit DI/DO Word(`0x6000`/`0x7010`), `AI16` 16채널 전압, `CNT2` 2채널 펄스를 실시간 반영하고, 오프라인 시 `🔵 Virtual Simulation` 모드로 동작.
+3. **`IoHardwareCheckControl.xaml` 3단 서브탭 고도화 및 하이브리드 CNT2 UI 반영:**
+   * **[탭 1] `N3ECAT-DB32T (16 DI / 16 DO)`:** 실시간 16-bit Word Hex/Binary 모니터, `DI 시뮬레이션 수동반전 허용` 체크박스, `DO01~08 순차 점멸(Walking) 테스트` 버튼 및 32채널 실시간 제어/명칭 편집.
+   * **[탭 2] `N3ECAT-AI16 (CH01 ~ CH16)`:** `CH1~4` 전압/전류(`-20~+20mA`) DIP 스위치 특성 및 `CH5~16` 전압 전용 특성 표시, 16채널 명칭/입력모드/Scale/Offset/Unit 동적 편집 및 실시간 물리량(`Converted = Raw × Scale + Offset`) 게이지 바 모니터링.
+   * **[탭 3] `N3ECAT-CNT2 (Z-Scale Low-Level)` + 좌측 JOG 카드 단축 버튼:**
+     * 좌측 `3축 모션 JOG` 카드에 `[🎯 Z-Scale 0점 리셋]` 원클릭 단축 버튼 배치.
+     * 우측 `CNT2 Low-Level` 탭에 `CH1/CH2` 28-bit Raw Pulse/Hex 모니터, `0x7000/0x7002` 원점 0점 초기화 및 지정 위치 Preset, `0x2001` 체배율(`Up/Down`, `1/2/4체배`), `0x2002` 카운트 방향(`CW/CCW`), `0x7010` 고속 위치 비교 트리거 및 One-Shot 수동 발사 UI 구현.
+   * `v1.2.0` 패치 실행 파일(`src/Release_Bin/MultiScanX.App.exe`, 375.1 KB) 및 정식 인스톨러(`MultiScanX_Setup_v1.2.0.exe`, 2.11 MB) 빌드 완료.
+
+### 3. 주요 생성 및 변경 산출물 목록
+| 파일 경로 | 설명 |
+| :--- | :--- |
+| `../03_소프트웨어 개발/MultiScanX_GUI_디자인검토용_배포패키지_v1.1.0.zip` | 일반 관리자 PC 검토용 GUI 3종 비교 실행 파일 + 런타임 자동설치 패키지 (2.84 MB) |
+| [src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs) | `CAXL`, `CAXM`, `CAXD`, `CAXA`, `CAXC` 통합 `AXL.dll` P/Invoke 래퍼 |
+| [src/MultiScanX/MultiScanX.Hardware/Ajinextek/AjinDigitalIO.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AjinDigitalIO.cs) | `N3ECAT-DB32T` 실물 16-bit Word(`0x6000`/`0x7010`) 및 Bit 입출력 제어기 |
+| [src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs](../src/MultiScanX/MultiScanX.Core/Models/SystemConfig.cs) | `AiChannelConfig` 16채널 모델 및 `CNT2` Low-Level 파라미터 설정 모델 추가 |
+| [src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs) | `50ms` 실시간 AXL 하드웨어 폴링, `AI16` 스케일링, `CNT2` Low-Level 제어 구현 |
+| [src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml](../src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml) | 3단 서브탭(`DB32T DIO` / `AI16 16CH` / `CNT2 Low-Level`) 및 JOG 0점 리셋 UI |
+
+### 4. 다음 작업 (Next Action Items)
+- [ ] **1. 산업용 PC(`Nuvo-9002E`)에 `v1.2.0` 실행 파일 배포 후, `EzConfig` OP 상태에서 `[🛠 H/W & I/O Check 스튜디오 창]`을 열어 실물 `DB32T`, `AI16`, `CNT2` 실시간 입출력 및 0점 Preset 연동 확인**
+- [ ] **2. 파나소닉 서보(`MINAS-A6B` X/Y축) 및 파스텍 스텝(`Ezi-SERVO II Plus-E` Z축) 실물 JOG 구동 파라미터 연동**
+
 
 
 

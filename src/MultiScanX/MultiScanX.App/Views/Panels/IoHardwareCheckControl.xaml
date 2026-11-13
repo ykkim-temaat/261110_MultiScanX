@@ -4,14 +4,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignWidth="1400" d:DesignHeight="850">
+             d:DesignWidth="1500" d:DesignHeight="880">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="460"/>
-            <!-- Left: 3축 JOG / CNT2 / CI-600A 로드셀 / EtherCAT Slaves -->
+            <ColumnDefinition Width="465"/>
+            <!-- Left: 3축 JOG / CNT2 요약 / CI-600A 로드셀 / EtherCAT Slaves -->
             <ColumnDefinition Width="12"/>
             <ColumnDefinition Width="*"/>
-            <!-- Right: DB32T 16 DI / 16 DO 실시간 점검 & 명칭 편집 -->
+            <!-- Right: 아진엑스텍 3대 슬레이브 통합 관제 (탭1: DB32T DIO / 탭2: AI16 16CH / 탭3: CNT2 Low-Level) -->
         </Grid.ColumnDefinitions>
 
         <!-- 좌측: 3축 JOG & CNT2 리니어스케일 & CAS CI-600A 로드셀 & EtherCAT 슬레이브 -->
@@ -36,7 +36,7 @@
                                     <TextBlock Text="{Binding CurrZFormatted, Mode=OneWay}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#6D28D9"/>
                                 </DockPanel>
                                 <DockPanel>
-                                    <TextBlock Text="CNT2 CH0 (Renishaw 50nm Scale):" Foreground="#475569" FontWeight="SemiBold"/>
+                                    <TextBlock Text="CNT2 CH1 (Renishaw 50nm Scale):" Foreground="#475569" FontWeight="SemiBold"/>
                                     <TextBlock Text="{Binding Cnt2ScaleFormatted, Mode=OneWay}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="Bold" Foreground="#7C3AED"/>
                                 </DockPanel>
                             </StackPanel>
@@ -70,8 +70,9 @@
                             <Button Content="🔽 Z + (Down 하강)" Margin="2" Height="32" Style="{StaticResource LavenderActionButton}" Click="BtnJog_Click" Tag="Z:1"/>
                         </UniformGrid>
 
-                        <UniformGrid Columns="2">
-                            <Button Content="🏠 전 축 HOME 원점 복귀" Margin="2" Height="32" Style="{StaticResource MintActionButton}" Click="BtnHomeAll_Click"/>
+                        <UniformGrid Columns="3">
+                            <Button Content="🏠 전 축 HOME" Margin="2" Height="32" Style="{StaticResource MintActionButton}" Click="BtnHomeAll_Click"/>
+                            <Button Content="🎯 Z-Scale 0점 리셋" Margin="2" Height="32" Style="{StaticResource LavenderActionButton}" Click="BtnCnt2ZeroClear_Click"/>
                             <Button Content="{Binding ZBrakeStatusText}" Margin="2" Height="32" Style="{StaticResource AmberActionButton}" Click="BtnToggleBrake_Click"/>
                         </UniformGrid>
                     </StackPanel>
@@ -100,7 +101,7 @@
                             </UniformGrid>
                         </Border>
 
-                        <!-- 하중 시뮬레이션 슬라이더 (SP1 15g -> DI4 ON / SP2 30g -> DI5 ON & Z축 자동상승 테스트) -->
+                        <!-- 하중 시뮬레이션 슬라이더 -->
                         <DockPanel Margin="0,0,0,6">
                             <TextBlock Text="하중 인가 테스트(g):" Width="115" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#334155"/>
                             <TextBlock DockPanel.Dock="Right" Text="{Binding CurrentLoadGram, StringFormat='{}{0:F1} g'}" Width="55" TextAlignment="Right" FontWeight="Bold" Foreground="#DC2626" VerticalAlignment="Center"/>
@@ -134,7 +135,7 @@
                     <StackPanel>
                         <TextBlock Text="🔗 EtherCAT 마스터(PCIe-R0805) 7개 슬레이브 상태" Style="{StaticResource SectionTitleStyle}"/>
                         <DataGrid ItemsSource="{Binding EtherCatSlaves}" AutoGenerateColumns="False" IsReadOnly="True"
-                                  Style="{StaticResource PastelDataGridStyle}" Height="215">
+                                  Style="{StaticResource PastelDataGridStyle}" Height="210">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="ID" Binding="{Binding NodeId}" Width="35"/>
                                 <DataGridTextColumn Header="DIP" Binding="{Binding DipSwitchHex}" Width="45"/>
@@ -148,7 +149,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- 우측: N3ECAT-DB32T 16 DI / 16 DO 실시간 모니터 및 동적 명칭 편집 -->
+        <!-- 우측: 아진엑스텍 3종 EtherCAT 슬레이브 통합 관제 (탭1: DB32T DIO / 탭2: AI16 16CH / 탭3: CNT2 Low-Level) -->
         <Border Grid.Column="2" Style="{StaticResource PastelCardStyle}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -156,82 +157,333 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
+                <!-- 상단 공통 헤더: 실물 AXL 온라인 상태 배지 & 재연결/저장 버튼 -->
                 <DockPanel Grid.Row="0" Margin="0,0,0,10">
                     <StackPanel>
-                        <TextBlock Text="💡 N3ECAT-DB32T (Node 0x04) 16 DI / 16 DO 실시간 점검 &amp; 예비 채널 동적 매핑" FontSize="14" FontWeight="Bold" Foreground="#1E293B"/>
-                        <TextBlock Text="DO 출력 버튼을 클릭하면 즉시 ON/OFF 토글되며, 예비 채널(DI06~16, DO07~16)의 명칭을 현장에서 바로 수정할 수 있습니다."
-                                   FontSize="11" Foreground="#64748B" Margin="0,2,0,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🛠 아진엑스텍 EtherCAT 슬레이브 실시간 점검 &amp; Low-Level 설정" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Border Background="{Binding AxlConnectionBadgeBg}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="{Binding AxlConnectionBadgeText}" Foreground="{Binding AxlConnectionBadgeFg}" FontSize="11.5" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="50ms(20Hz) 주기로 DB32T(16DI/16DO), AI16(16CH 전압/전류), CNT2(2CH 카운터/트리거)를 실시간 폴링합니다."
+                                   FontSize="11" Foreground="#64748B" Margin="0,3,0,0"/>
                     </StackPanel>
-                    <Button DockPanel.Dock="Right" Content="💾 I/O 명칭 및 설정 저장" Style="{StaticResource MintActionButton}" HorizontalAlignment="Right" Click="BtnSaveIoConfig_Click"/>
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="🔌 AXL 실물 재연결/스캔" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnReconnectAxl_Click"/>
+                        <Button Content="💾 I/O·AI·CNT2 설정 저장" Style="{StaticResource MintActionButton}" Click="BtnSaveIoConfig_Click"/>
+                    </StackPanel>
                 </DockPanel>
 
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <!-- 3단 서브탭: [1] DB32T 디지털 I/O | [2] AI16 아날로그 입력 | [3] CNT2 고속 카운터 Low-Level -->
+                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+                    <!-- ================================================================================= -->
+                    <!-- [탭 1] N3ECAT-DB32T (Node 0x04) 16 DI / 16 DO 실시간 모니터 및 동적 명칭 편집        -->
+                    <!-- ================================================================================= -->
+                    <TabItem Header="📥📤 1. 디지털 입출력 (N3ECAT-DB32T: 16 DI / 16 DO)" Style="{StaticResource PastelTabItemStyle}">
+                        <Grid Margin="0,8,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                    <!-- 좌: 16 DI 입력 채널 리스트 -->
-                    <Border Grid.Column="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="📥 Digital Input (DI01 ~ DI16) — 클릭 시 시뮬레이션 신호 반전" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,8"/>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding DiChannels}">
+                            <!-- PDO Word Hex/Binary 상태 바 및 DO 순차 점멸 테스트 -->
+                            <Border Grid.Row="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,8">
+                                <DockPanel>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DiWordHexBinary}" FontWeight="Bold" Foreground="#1D4ED8" FontSize="11.5" Margin="0,0,18,0"/>
+                                        <TextBlock Text="{Binding DoWordHexBinary}" FontWeight="Bold" Foreground="#047857" FontSize="11.5"/>
+                                    </StackPanel>
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <CheckBox Content="DI 시뮬레이션 수동반전 허용" IsChecked="{Binding AllowDiSimulationOverride}" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,10,0"/>
+                                        <Button Content="⚡ DO01~08 순차 점멸(Walking) 테스트" Style="{StaticResource LavenderActionButton}" Padding="8,3" FontSize="11" Click="BtnDoBlinkTest_Click"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 좌: 16 DI 입력 채널 리스트 (TxPDO 0x1A00 -> 0x6000:00) -->
+                                <Border Grid.Column="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="📥 Digital Input (DI01 ~ DI16, 0x6000) — 실물 센서 상태 모니터" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,8"/>
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding DiChannels}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="48"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="78"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
+                                                                <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
+                                                                        BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
+                                                                        Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- 우: 16 DO 출력 채널 리스트 (RxPDO 0x1601 -> 0x7010:00) -->
+                                <Border Grid.Column="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" Text="📤 Digital Output (DO01 ~ DO16, 0x7010) — 클릭 시 실물/시뮬 출력 토글" FontWeight="Bold" Foreground="#047857" Margin="0,0,0,8"/>
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding DoChannels}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="48"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="78"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
+                                                                <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
+                                                                        BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
+                                                                        Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- ================================================================================= -->
+                    <!-- [탭 2] N3ECAT-AI16 (Node 0x05) 16CH 아날로그 입력 정의, 스케일링 및 실시간 모니터링  -->
+                    <!-- ================================================================================= -->
+                    <TabItem Header="📈 2. 아날로그 입력 &amp; 스케일링 (N3ECAT-AI16: CH01 ~ CH16)" Style="{StaticResource PastelTabItemStyle}">
+                        <Grid Margin="0,8,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- AI16 하드웨어 사양 배너 (03-1_N3ECAT-AI16_AO8_Manual(K)_201504.pdf p.6, 13, 22) -->
+                            <Border Grid.Row="0" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,8">
+                                <TextBlock Text="📘 N3ECAT-AI16 매뉴얼(p.13, 22): 총 16채널 16-bit (4kHz) | CH1~CH4는 전면 DIP 스위치로 전압(OFF, 오른쪽)/전류(ON, 왼쪽 -20~+20mA) 선택 가능, CH5~CH16은 전압(-10~+10V) 전용 | 물리량 = Raw × Scale + Offset"
+                                           FontSize="11.5" FontWeight="SemiBold" Foreground="#1E40AF" TextWrapping="Wrap"/>
+                            </Border>
+
+                            <!-- 컬럼 헤더 -->
+                            <Border Grid.Row="1" Background="#F1F5F9" CornerRadius="6" Padding="10,6" Margin="0,0,0,4">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="48"/>
+                                        <ColumnDefinition Width="105"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="185"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="65"/>
+                                        <ColumnDefinition Width="65"/>
+                                        <ColumnDefinition Width="55"/>
+                                        <ColumnDefinition Width="115"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="채널" FontWeight="Bold" FontSize="11.5" Foreground="#334155"/>
+                                    <TextBlock Grid.Column="1" Text="H/W 특성" FontWeight="Bold" FontSize="11.5" Foreground="#334155"/>
+                                    <TextBlock Grid.Column="2" Text="센서/채널 명칭 (동적 편집)" FontWeight="Bold" FontSize="11.5" Foreground="#334155"/>
+                                    <TextBlock Grid.Column="3" Text="입력 모드/범위" FontWeight="Bold" FontSize="11.5" Foreground="#334155"/>
+                                    <TextBlock Grid.Column="4" Text="실시간 Raw 입력" FontWeight="Bold" FontSize="11.5" Foreground="#1D4ED8"/>
+                                    <TextBlock Grid.Column="5" Text="Scale" FontWeight="Bold" FontSize="11.5" Foreground="#334155" TextAlignment="Center"/>
+                                    <TextBlock Grid.Column="6" Text="Offset" FontWeight="Bold" FontSize="11.5" Foreground="#334155" TextAlignment="Center"/>
+                                    <TextBlock Grid.Column="7" Text="단위" FontWeight="Bold" FontSize="11.5" Foreground="#334155" TextAlignment="Center"/>
+                                    <TextBlock Grid.Column="8" Text="환산 물리량" FontWeight="Bold" FontSize="11.5" Foreground="#047857" TextAlignment="Right"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 16채널 스크롤 리스트 -->
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding AiChannels}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
-                                                <Grid>
+                                            <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="8,5" Margin="0,0,0,4">
+                                                <Grid VerticalAlignment="Center">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="48"/>
+                                                        <ColumnDefinition Width="105"/>
                                                         <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="78"/>
+                                                        <ColumnDefinition Width="185"/>
+                                                        <ColumnDefinition Width="150"/>
+                                                        <ColumnDefinition Width="65"/>
+                                                        <ColumnDefinition Width="65"/>
+                                                        <ColumnDefinition Width="55"/>
+                                                        <ColumnDefinition Width="115"/>
                                                     </Grid.ColumnDefinitions>
+
                                                     <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                    <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
-                                                    <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
-                                                            BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
-                                                            Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding HardwareCapNote}" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center"/>
+                                                    <TextBox Grid.Column="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,8,0"/>
+                                                    <ComboBox Grid.Column="3" ItemsSource="{Binding DataContext.AiSignalModeOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                              SelectedItem="{Binding SignalMode, Mode=TwoWay}" Height="26" FontSize="11" Margin="0,0,8,0"/>
+
+                                                    <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding RawFormatted}" FontWeight="Bold" Foreground="#1D4ED8" FontSize="11.5"/>
+                                                        <ProgressBar Value="{Binding GaugePercent, Mode=OneWay}" Maximum="100" Height="6" Foreground="#3B82F6" Background="#E2E8F0" Margin="0,2,0,0"/>
+                                                    </StackPanel>
+
+                                                    <TextBox Grid.Column="5" Text="{Binding Scale, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Right" Margin="2,0"/>
+                                                    <TextBox Grid.Column="6" Text="{Binding Offset, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Right" Margin="2,0"/>
+                                                    <TextBox Grid.Column="7" Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" TextAlignment="Center" Margin="2,0"/>
+
+                                                    <Border Grid.Column="8" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="5" Padding="6,3" Margin="4,0,0,0">
+                                                        <TextBlock Text="{Binding ConvertedFormatted}" FontWeight="Bold" Foreground="#047857" FontSize="11.5" TextAlignment="Right" VerticalAlignment="Center"/>
+                                                    </Border>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
-                        </DockPanel>
-                    </Border>
+                        </Grid>
+                    </TabItem>
 
-                    <!-- 우: 16 DO 출력 채널 리스트 -->
-                    <Border Grid.Column="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="📤 Digital Output (DO01 ~ DO16) — 클릭 시 강제 ON/OFF 출력" FontWeight="Bold" Foreground="#047857" Margin="0,0,0,8"/>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding DoChannels}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="48"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="78"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                    <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
-                                                    <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
-                                                            BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
-                                                            Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
-                                                </Grid>
+                    <!-- ================================================================================= -->
+                    <!-- [탭 3] N3ECAT-CNT2 (Node 0x03) Z축 리니어스케일 Low-Level 세팅 및 고속 위치 트리거  -->
+                    <!-- ================================================================================= -->
+                    <TabItem Header="📏 3. 고속 카운터 &amp; 트리거 Low-Level (N3ECAT-CNT2: Z-Scale)" Style="{StaticResource PastelTabItemStyle}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                            <StackPanel>
+                                <!-- 안내 배너 -->
+                                <Border Background="#F5F3FF" BorderBrush="#DDD6FE" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
+                                    <TextBlock Text="📘 N3ECAT-CNT2 매뉴얼(02-2_N3ECAT_Slave_SW_KOR_V1.1.pdf p.67~90, Product 0x00000902): Z축 구동은 FASTECH 서보가 담당하고, Renishaw 50nm 리니어스케일 피드백과 하드웨어 위치 트리거는 본 아진 CNT2 모듈이 전담합니다."
+                                               FontSize="11.5" FontWeight="SemiBold" Foreground="#5B21B6" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- 섹션 1: CH1 / CH2 실시간 28-bit 카운터 & PDO 상태 모니터 -->
+                                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="1. 듀얼 채널 실시간 28-bit 카운터 &amp; TxPDO (0x1A00) 상태 모니터" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,8"/>
+                                        <Border Background="White" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Cnt2Ch1DetailText}" FontSize="14" FontWeight="Bold" Foreground="#6D28D9" Margin="0,0,0,6"/>
+                                                <TextBlock Text="{Binding Cnt2Ch2DetailText}" FontSize="12.5" FontWeight="SemiBold" Foreground="#475569"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <UniformGrid Columns="2">
+                                            <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,6,0">
+                                                <TextBlock Text="{Binding Cnt2PresetStatusText}" FontWeight="Bold" Foreground="#047857" FontSize="11.5"/>
                                             </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </DockPanel>
-                    </Border>
-                </Grid>
+                                            <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="6,0,0,0">
+                                                <TextBlock Text="{Binding Cnt2TriggerStatusText}" FontWeight="Bold" Foreground="#1D4ED8" FontSize="11.5"/>
+                                            </Border>
+                                        </UniformGrid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 섹션 2: 원점 초기화(Zero Clear) 및 지정 위치 프리셋 (RxPDO 0x7000 & 0x7002) -->
+                                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="2. Z축 리니어스케일 원점(0점) 설정 및 임의 기준위치 Preset (RxPDO 0x7000 &amp; 0x7002)" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,6"/>
+                                        <TextBlock Text="JOG로 Z축 헤드를 기준 시편(또는 원점)에 접촉시킨 후 [0점 초기화]를 누르면 CNT2 카운터가 0 Pulse로 즉시 리셋됩니다."
+                                                   FontSize="11" Foreground="#64748B" Margin="0,0,0,10"/>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="260"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Button Grid.Column="0" Content="🎯 CH1 원점 0점 초기화 (0.0000 mm Zero Clear)" Height="36" Style="{StaticResource MintActionButton}" Click="BtnCnt2ZeroClear_Click"/>
+                                            <TextBlock Grid.Column="2" Text="Preset 목표 위치(mm):" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                                            <TextBox Grid.Column="3" Text="{Binding CurrentConfig.Cnt2PresetTargetMm, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" VerticalContentAlignment="Center" Height="32" Margin="0,0,8,0"/>
+                                            <Button Grid.Column="4" Content="📌 지정 위치 Preset 강제 적용 (0x7000 Target -> 0x7002 Bit0 Rising)" Height="36" Style="{StaticResource LavenderActionButton}" Click="BtnCnt2ApplyPreset_Click"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 섹션 3: 인코더 체배율(0x2001) 및 카운트 방향(0x2002) SDO Low-Level 설정 -->
+                                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="3. 인코더 체배율 (SDO 0x2001) &amp; 카운트 방향 (SDO 0x2002) Low-Level 설정" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10"/>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="135"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="135"/>
+                                                <ColumnDefinition Width="90"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0" Text="입력 체배율 (0x2001):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <ComboBox Grid.Column="1" ItemsSource="{Binding Cnt2EncoderMethodOptions}" SelectedIndex="{Binding CurrentConfig.Cnt2EncoderMethodIndex}" Height="30" Margin="0,0,12,0"/>
+
+                                            <TextBlock Grid.Column="2" Text="카운트 방향 (0x2002):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <ComboBox Grid.Column="3" ItemsSource="{Binding Cnt2EncoderDirectionOptions}" SelectedIndex="{Binding CurrentConfig.Cnt2EncoderDirectionIndex}" Height="30" Margin="0,0,12,0"/>
+
+                                            <TextBlock Grid.Column="4" Text="스케일 분해능(nm/cnt):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <TextBox Grid.Column="5" Text="{Binding CurrentConfig.Cnt2ScaleResolutionNm, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Height="30" VerticalContentAlignment="Center"/>
+                                        </Grid>
+
+                                        <Button Content="⚙ CNT2 인코더 SDO 파라미터(체배율/방향/분해능) 하드웨어 적용" Height="34" Style="{StaticResource PrimaryPastelButton}" Click="BtnCnt2ApplyEncoder_Click"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 섹션 4: 고속 위치 비교 트리거 (RxPDO 0x7010 & SDO 0x2010~0x2012) -->
+                                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14">
+                                    <StackPanel>
+                                        <TextBlock Text="4. 고속 하드웨어 위치 비교 트리거 설정 &amp; 수동 발사 점검 (RxPDO 0x7010 &amp; SDO 0x2010~0x2012)" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,10"/>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="115"/>
+                                                <ColumnDefinition Width="160"/>
+                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="115"/>
+                                                <ColumnDefinition Width="80"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0" Text="트리거 모드(0x2010):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <ComboBox Grid.Column="1" ItemsSource="{Binding Cnt2TriggerModeOptions}" SelectedIndex="{Binding CurrentConfig.Cnt2TriggerModeIndex}" Height="30" Margin="0,0,10,0"/>
+
+                                            <TextBlock Grid.Column="2" Text="출력 레벨(0x2011):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <ComboBox Grid.Column="3" ItemsSource="{Binding Cnt2TriggerLevelOptions}" SelectedIndex="{Binding CurrentConfig.Cnt2TriggerLevelIndex}" Height="30" Margin="0,0,10,0"/>
+
+                                            <TextBlock Grid.Column="4" Text="펄스 폭(0x2012 us):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <TextBox Grid.Column="5" Text="{Binding CurrentConfig.Cnt2TriggerPulseWidthUs, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Height="30" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+
+                                            <TextBlock Grid.Column="6" Text="비교 목표위치(mm):" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                            <TextBox Grid.Column="7" Text="{Binding CurrentConfig.Cnt2TriggerComparePosMm, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Height="30" VerticalContentAlignment="Center"/>
+                                        </Grid>
+
+                                        <UniformGrid Columns="2">
+                                            <Button Content="{Binding Cnt2TriggerButtonText}" Height="34" Style="{StaticResource LavenderActionButton}" Margin="0,0,6,0" Click="BtnCnt2ToggleTrigger_Click"/>
+                                            <Button Content="🔥 1회 수동 트리거 발사 (One-Shot Trigger: 0x7010 Bit1)" Height="34" Style="{StaticResource AmberActionButton}" Margin="6,0,0,0" Click="BtnCnt2OneShot_Click"/>
+                                        </UniformGrid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
             </Grid>
         </Border>
     </Grid>
 </UserControl>
-
