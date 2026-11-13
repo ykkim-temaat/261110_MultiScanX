@@ -378,6 +378,13 @@
    * **공식 API 교정 (`AXM.cs`/`AXC.cs`/`AXA.cs` 검증):** IPC에서 조회한 아진 공식 C# 래퍼 시그니처에 맞춰 [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs), [AjinMotionController.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AjinMotionController.cs), [MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs), [ethercat_bench_test.ps1](../MultiScanX_deploy/03_Diagnostics/ethercat_bench_test.ps1)의 미존재 함수(`AxmStatusReadActPos`, `AxcStatusReadCount`, `AxaReadChannelVolt`)를 정품 함수(`AxmStatusGetActPos`, `AxcStatusGetActPos`, `AxcStatusSetActPos`, `AxaiSwReadVoltage`, `AxcTriggerSetNotchPos` 등)로 전면 교체 완료.
    * **엔지니어 편집 잠금 & AI DIP 스위치 UI:** `IoHardwareCheckControl` 상단에 `[🔒 편집 잠금 (PW 해제)]` (기본 PW `0000`, 5분 자동 잠금) 적용 및 `AI16 CH1~4` 전면 DIP 스위치(`OFF: 전압(V)` / `ON: 전류(mA)`) 선택 UI 추가 (`v1.2.3` 빌드: `MultiScanX.App.exe` 380.1 KB, `MultiScanX_Setup_v1.2.3.exe` 2.11 MB, 기동 검증 통과).
    * **규칙 및 배포/셋업 문서 소급 현행화:** [.agents/AGENTS.md](../.agents/AGENTS.md)(상충 시 기존 문서 소급 현행화 규칙 추가), [00_IPC_셋업_체크리스트_SOP.md](../MultiScanX_deploy/00_IPC_셋업_체크리스트_SOP.md)(Rev 1.5), [02_Drivers/README.md](../MultiScanX_deploy/02_Drivers/README.md), [261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md)(Rev 1.6) 업데이트 완료.
+6. **실물 벤치테스트 PASS 및 UI/UX·Windows 편의기능 고도화 (`v1.2.4 ~ v1.2.5`):**
+   * **실물 EtherCAT 벤치테스트 전 구간 통과:** `ethercat_bench_test.ps1` 실행 결과 서보 2축(`ActPos=-61, 354`), `DB32T` (DO 0~7 순차 점멸 & DI `0x0101`), `CNT2` (CH0 `0 pulses`), `AI16` (CH0~3 `2.118~2.128V`) 정상 검증.
+   * **UI/UX 및 저장 안전장치 개선 (`v1.2.4 ~ v1.2.5`):**
+     * [IoHardwareCheckControl.xaml](../src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml): 상단 헤더 `Grid(ColumnDefinitions="*,Auto")` 분리로 편집 잠금 버튼 가림 해소, 상태 배지 간결화, `AI16` 콤보박스 `UpdateSourceTrigger=PropertyChanged` 명시.
+     * [IoHardwareCheckControl.xaml.cs](../src/MultiScanX/MultiScanX.App/Views/Panels/IoHardwareCheckControl.xaml.cs): 비번 팝업 `SizeToContent=WidthAndHeight`로 버튼 짤림 해소(`Enter`/`Esc` 지원), 잠금 버튼 재클릭 및 창 `[X]` 닫기 시 변경분 저장/원복 확인 팝업(`YesNoCancel`) 연동.
+     * [App.xaml.cs](../src/MultiScanX/MultiScanX.App/App.xaml.cs) & [MainViewModel.cs](../src/MultiScanX/MultiScanX.App/ViewModels/MainViewModel.cs): 전역 `Undo/Redo`(`Ctrl+Z`/`Ctrl+Y`/`Ctrl+Shift+Z`), `Ctrl+S` 저장, `Enter` 즉시 반영, `_isIoDirty` 추적 및 `PasswordBox` 이후 `TextBox` 한글 IME(`Shift+Space`) 전환 복원 적용 (`v1.2.5`, 400.1 KB 빌드·기동 검증 완료).
+   * **협업 규칙 및 배포 가이드 보완:** [.agents/AGENTS.md](../.agents/AGENTS.md)(`## 12.`) 및 [261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md](./261110-06_산업용PC_셋업_및_HelloWorld_배포가이드.md)(`Step 5`)에 `MultiScanX_deploy` 무결성 우선 vs `src\Release_Bin` 고속 복사 구분 원칙과 Git 커밋/푸시 사전 확인 규칙 추가.
 
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |

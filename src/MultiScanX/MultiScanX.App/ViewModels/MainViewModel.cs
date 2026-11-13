@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -273,8 +275,8 @@ namespace MultiScanX.App.ViewModels
         }
 
         public string AxlConnectionBadgeText => IsAxlHardwareOnline
-            ? $"🟢 AXL Online (Axes:{_detectedAxisCount} | DIO:{_detectedDioModuleCount} | AI:{_detectedAiModuleCount} | CNT:{_detectedCntModuleCount})"
-            : "🔵 Virtual Simulation (AXL 오프라인 - 수동 시뮬레이션 활성)";
+            ? $"🟢 AXL Online ({_detectedAxisCount}Ax / DI:{_detectedDioModuleCount} / AI:{_detectedAiModuleCount} / CT:{_detectedCntModuleCount})"
+            : "🔵 Virtual Simulation (오프라인)";
 
         public string AxlConnectionBadgeBg => IsAxlHardwareOnline ? "#DCFCE7" : "#DBEAFE";
         public string AxlConnectionBadgeFg => IsAxlHardwareOnline ? "#15803D" : "#1D4ED8";
@@ -603,6 +605,8 @@ namespace MultiScanX.App.ViewModels
         // 7. 비밀번호 잠금 보호 상태 (편집 잠금 및 5분 자동 잠금)
         private bool _isAdminUnlocked = false;
         private DateTime _adminUnlockExpireAt = DateTime.MinValue;
+        private string? _ioSnapshotBeforeEdit;
+        private bool _isIoDirty;
         public bool IsAdminUnlocked
         {
             get => _isAdminUnlocked;
@@ -612,6 +616,7 @@ namespace MultiScanX.App.ViewModels
                 if (value)
                 {
                     _adminUnlockExpireAt = DateTime.Now.AddMinutes(Math.Max(1, CurrentConfig?.AutoLockMinutes ?? 5));
+                    TakeIoSnapshot();
                 }
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsIoEditLocked));
@@ -620,6 +625,83 @@ namespace MultiScanX.App.ViewModels
                 OnPropertyChanged(nameof(AdminLockBadgeBg));
                 OnPropertyChanged(nameof(AdminLockBadgeFg));
             }
+        }
+
+        private string CaptureIoStateJson()
+        {
+            var payload = new
+            {
+                Di = DiChannels.Select(d => d.Name).ToList(),
+                Do = DoChannels.Select(d => d.Name).ToList(),
+                Ai = AiChannels.Select(a => new { a.Name, a.DipSwitchMode, a.SignalMode, a.Scale, a.Offset, a.Unit }).ToList(),
+                Cnt2 = new
+                {
+                    CurrentConfig.Cnt2EncoderMethodIndex,
+                    CurrentConfig.Cnt2EncoderDirectionIndex,
+                    CurrentConfig.Cnt2ScaleResolutionNm,
+                    CurrentConfig.Cnt2PresetTargetMm,
+                    CurrentConfig.Cnt2TriggerModeIndex,
+                    CurrentConfig.Cnt2TriggerLevelIndex,
+                    CurrentConfig.Cnt2TriggerPulseWidthUs,
+                    CurrentConfig.Cnt2TriggerComparePosMm
+                }
+            };
+            return JsonSerializer.Serialize(payload);
+        }
+
+        public void TakeIoSnapshot()
+        {
+            _ioSnapshotBeforeEdit = CaptureIoStateJson();
+            _isIoDirty = false;
+        }
+
+        public bool HasIoConfigChanges()
+        {
+            if (_isIoDirty) return true;
+            if (string.IsNullOrEmpty(_ioSnapshotBeforeEdit)) return false;
+            return !string.Equals(_ioSnapshotBeforeEdit, CaptureIoStateJson(), StringComparison.Ordinal);
+        }
+
+        public void RestoreIoSnapshot()
+        {
+            if (string.IsNullOrEmpty(_ioSnapshotBeforeEdit)) return;
+            try
+            {
+                using var doc = JsonDocument.Parse(_ioSnapshotBeforeEdit);
+                var root = doc.RootElement;
+                var diArr = root.GetProperty("Di");
+                for (int i = 0; i < Math.Min(DiChannels.Count, diArr.GetArrayLength()); i++)
+                    DiChannels[i].Name = diArr[i].GetString() ?? DiChannels[i].Name;
+
+                var doArr = root.GetProperty("Do");
+                for (int i = 0; i < Math.Min(DoChannels.Count, doArr.GetArrayLength()); i++)
+                    DoChannels[i].Name = doArr[i].GetString() ?? DoChannels[i].Name;
+
+                var aiArr = root.GetProperty("Ai");
+                for (int i = 0; i < Math.Min(AiChannels.Count, aiArr.GetArrayLength()); i++)
+                {
+                    var item = aiArr[i];
+                    AiChannels[i].Name = item.GetProperty("Name").GetString() ?? AiChannels[i].Name;
+                    AiChannels[i].DipSwitchMode = item.GetProperty("DipSwitchMode").GetString() ?? AiChannels[i].DipSwitchMode;
+                    AiChannels[i].SignalMode = item.GetProperty("SignalMode").GetString() ?? AiChannels[i].SignalMode;
+                    AiChannels[i].Scale = item.GetProperty("Scale").GetDouble();
+                    AiChannels[i].Offset = item.GetProperty("Offset").GetDouble();
+                    AiChannels[i].Unit = item.GetProperty("Unit").GetString() ?? AiChannels[i].Unit;
+                }
+
+                var cnt = root.GetProperty("Cnt2");
+                CurrentConfig.Cnt2EncoderMethodIndex = cnt.GetProperty("Cnt2EncoderMethodIndex").GetInt32();
+                CurrentConfig.Cnt2EncoderDirectionIndex = cnt.GetProperty("Cnt2EncoderDirectionIndex").GetInt32();
+                CurrentConfig.Cnt2ScaleResolutionNm = cnt.GetProperty("Cnt2ScaleResolutionNm").GetDouble();
+                CurrentConfig.Cnt2PresetTargetMm = cnt.GetProperty("Cnt2PresetTargetMm").GetDouble();
+                CurrentConfig.Cnt2TriggerModeIndex = cnt.GetProperty("Cnt2TriggerModeIndex").GetInt32();
+                CurrentConfig.Cnt2TriggerLevelIndex = cnt.GetProperty("Cnt2TriggerLevelIndex").GetInt32();
+                CurrentConfig.Cnt2TriggerPulseWidthUs = cnt.GetProperty("Cnt2TriggerPulseWidthUs").GetDouble();
+                CurrentConfig.Cnt2TriggerComparePosMm = cnt.GetProperty("Cnt2TriggerComparePosMm").GetDouble();
+                OnPropertyChanged(nameof(CurrentConfig));
+                AddLog("↩ 편집 취소: I/O·AI·CNT2 설정을 편집 전 상태로 복원했습니다.");
+            }
+            catch { }
         }
 
         public bool IsIoEditLocked => !IsAdminUnlocked;
@@ -713,6 +795,7 @@ namespace MultiScanX.App.ViewModels
 
             InitializeHardwareChannels();
             PopulateSamplePrePostResults();
+            RecordUndoCheckpoint("초기 상태");
 
             string noteSuffix = string.IsNullOrWhiteSpace(AppReleaseNote) ? string.Empty : $" | {AppReleaseNote}";
             AddLog($"MultiScan-X Studio v{AppVersion} 기동 완료{noteSuffix}");
@@ -867,6 +950,30 @@ namespace MultiScanX.App.ViewModels
                     Offset = savedAi?.Offset ?? def.Offset,
                     Unit = savedAi?.Unit ?? def.Unit
                 });
+            }
+
+            foreach (var d in DiChannels)
+            {
+                d.PropertyChanged += (_, args) => { if (IsAdminUnlocked && args.PropertyName == nameof(IoBitViewModel.Name)) _isIoDirty = true; };
+            }
+            foreach (var d in DoChannels)
+            {
+                d.PropertyChanged += (_, args) => { if (IsAdminUnlocked && args.PropertyName == nameof(IoBitViewModel.Name)) _isIoDirty = true; };
+            }
+            foreach (var a in AiChannels)
+            {
+                a.PropertyChanged += (_, args) =>
+                {
+                    if (IsAdminUnlocked && (args.PropertyName == nameof(AiChannelViewModel.Name) ||
+                        args.PropertyName == nameof(AiChannelViewModel.DipSwitchMode) ||
+                        args.PropertyName == nameof(AiChannelViewModel.SignalMode) ||
+                        args.PropertyName == nameof(AiChannelViewModel.Scale) ||
+                        args.PropertyName == nameof(AiChannelViewModel.Offset) ||
+                        args.PropertyName == nameof(AiChannelViewModel.Unit)))
+                    {
+                        _isIoDirty = true;
+                    }
+                };
             }
 
             UpdateSimulatedIoWords();
@@ -1405,9 +1512,11 @@ namespace MultiScanX.App.ViewModels
 
         public void ShiftRecipePoints(double dx, double dy, double dz = 0.0)
         {
+            RecordUndoCheckpoint("레시피 이동 전");
             int? targetRow = SelectedShiftRowIndex == 0 ? null : SelectedShiftRowIndex;
             int? targetCol = SelectedShiftColIndex == 0 ? null : SelectedShiftColIndex;
             int count = _recipeService.ShiftPoints(CurrentRecipe, targetRow, targetCol, dx, dy, dz);
+            RecordUndoCheckpoint($"레시피 이동 ({count}pt)");
 
             string scope = $"{RowFilterOptions[SelectedShiftRowIndex]} / {ColFilterOptions[SelectedShiftColIndex]}";
             StatusMessage = $"[레시피 좌표 미세조정] {scope} ({count}개 포인트) -> dX={dx:+0.0;-0.0;0.0}mm, dY={dy:+0.0;-0.0;0.0}mm, dZ={dz:+0.000;-0.000;0.000}mm 반영";
@@ -1416,9 +1525,154 @@ namespace MultiScanX.App.ViewModels
 
         public void OptimizeRecipePath()
         {
+            RecordUndoCheckpoint("경로 정렬 전");
             var (beforeDist, afterDist) = _recipeService.OptimizeSnakeOrder(CurrentRecipe);
+            RecordUndoCheckpoint("Snake 경로 정렬");
             PathOptimizationSummary = $"Snake 최단 경로 정렬 완료: {beforeDist:N1} mm ➔ {afterDist:N1} mm";
             AddLog($"[경로 최적화] {PathOptimizationSummary}");
+        }
+
+        // === 전역 Undo / Redo (Ctrl+Z / Ctrl+Y) 스냅샷 엔진 ===
+        private sealed class AppUndoSnapshot
+        {
+            public string Description { get; init; } = string.Empty;
+            public string StateJson { get; init; } = string.Empty;
+        }
+
+        private readonly List<AppUndoSnapshot> _undoHistory = new();
+        private readonly List<AppUndoSnapshot> _redoHistory = new();
+        private string? _lastRecordedStateJson;
+        private bool _isApplyingUndoRedo;
+
+        private string CaptureFullAppStateJson()
+        {
+            var payload = new
+            {
+                Di = DiChannels.Select(d => d.Name).ToList(),
+                Do = DoChannels.Select(d => d.Name).ToList(),
+                Ai = AiChannels.Select(a => new { a.Name, a.DipSwitchMode, a.SignalMode, a.Scale, a.Offset, a.Unit }).ToList(),
+                Config = CurrentConfig,
+                Recipe = CurrentRecipe
+            };
+            return JsonSerializer.Serialize(payload);
+        }
+
+        public void RecordUndoCheckpoint(string description = "편집")
+        {
+            if (_isApplyingUndoRedo) return;
+            try
+            {
+                string currentJson = CaptureFullAppStateJson();
+                if (_lastRecordedStateJson == null)
+                {
+                    _lastRecordedStateJson = currentJson;
+                    return;
+                }
+                if (string.Equals(_lastRecordedStateJson, currentJson, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _undoHistory.Add(new AppUndoSnapshot { Description = description, StateJson = _lastRecordedStateJson });
+                if (_undoHistory.Count > 50)
+                {
+                    _undoHistory.RemoveAt(0);
+                }
+                _redoHistory.Clear();
+                _lastRecordedStateJson = currentJson;
+            }
+            catch { }
+        }
+
+        public bool Undo()
+        {
+            if (_undoHistory.Count == 0) return false;
+            var target = _undoHistory[^1];
+            _undoHistory.RemoveAt(_undoHistory.Count - 1);
+
+            string currentJson = CaptureFullAppStateJson();
+            _redoHistory.Add(new AppUndoSnapshot { Description = target.Description, StateJson = currentJson });
+
+            ApplyFullAppStateJson(target.StateJson);
+            _lastRecordedStateJson = target.StateJson;
+            StatusMessage = $"↩ 실행 취소 (Ctrl+Z): {target.Description}";
+            AddLog(StatusMessage);
+            return true;
+        }
+
+        public bool Redo()
+        {
+            if (_redoHistory.Count == 0) return false;
+            var target = _redoHistory[^1];
+            _redoHistory.RemoveAt(_redoHistory.Count - 1);
+
+            string currentJson = CaptureFullAppStateJson();
+            _undoHistory.Add(new AppUndoSnapshot { Description = target.Description, StateJson = currentJson });
+
+            ApplyFullAppStateJson(target.StateJson);
+            _lastRecordedStateJson = target.StateJson;
+            StatusMessage = $"↪ 다시 실행 (Ctrl+Y): {target.Description}";
+            AddLog(StatusMessage);
+            return true;
+        }
+
+        private void ApplyFullAppStateJson(string json)
+        {
+            _isApplyingUndoRedo = true;
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                var diArr = root.GetProperty("Di");
+                for (int i = 0; i < Math.Min(DiChannels.Count, diArr.GetArrayLength()); i++)
+                    DiChannels[i].Name = diArr[i].GetString() ?? DiChannels[i].Name;
+
+                var doArr = root.GetProperty("Do");
+                for (int i = 0; i < Math.Min(DoChannels.Count, doArr.GetArrayLength()); i++)
+                    DoChannels[i].Name = doArr[i].GetString() ?? DoChannels[i].Name;
+
+                var aiArr = root.GetProperty("Ai");
+                for (int i = 0; i < Math.Min(AiChannels.Count, aiArr.GetArrayLength()); i++)
+                {
+                    var item = aiArr[i];
+                    AiChannels[i].Name = item.GetProperty("Name").GetString() ?? AiChannels[i].Name;
+                    AiChannels[i].DipSwitchMode = item.GetProperty("DipSwitchMode").GetString() ?? AiChannels[i].DipSwitchMode;
+                    AiChannels[i].SignalMode = item.GetProperty("SignalMode").GetString() ?? AiChannels[i].SignalMode;
+                    AiChannels[i].Scale = item.GetProperty("Scale").GetDouble();
+                    AiChannels[i].Offset = item.GetProperty("Offset").GetDouble();
+                    AiChannels[i].Unit = item.GetProperty("Unit").GetString() ?? AiChannels[i].Unit;
+                }
+
+                var restoredCfg = JsonSerializer.Deserialize<SystemConfig>(root.GetProperty("Config").GetRawText());
+                if (restoredCfg != null)
+                {
+                    CurrentConfig.Cl3000Offset = restoredCfg.Cl3000Offset;
+                    CurrentConfig.MmsPc2Offset = restoredCfg.MmsPc2Offset;
+                    CurrentConfig.F20ExrOffset = restoredCfg.F20ExrOffset;
+                    CurrentConfig.Cnt2EncoderMethodIndex = restoredCfg.Cnt2EncoderMethodIndex;
+                    CurrentConfig.Cnt2EncoderDirectionIndex = restoredCfg.Cnt2EncoderDirectionIndex;
+                    CurrentConfig.Cnt2ScaleResolutionNm = restoredCfg.Cnt2ScaleResolutionNm;
+                    CurrentConfig.Cnt2PresetTargetMm = restoredCfg.Cnt2PresetTargetMm;
+                    CurrentConfig.Cnt2TriggerModeIndex = restoredCfg.Cnt2TriggerModeIndex;
+                    CurrentConfig.Cnt2TriggerLevelIndex = restoredCfg.Cnt2TriggerLevelIndex;
+                    CurrentConfig.Cnt2TriggerPulseWidthUs = restoredCfg.Cnt2TriggerPulseWidthUs;
+                    CurrentConfig.Cnt2TriggerComparePosMm = restoredCfg.Cnt2TriggerComparePosMm;
+                    OnPropertyChanged(nameof(CurrentConfig));
+                }
+
+                var restoredRecipe = JsonSerializer.Deserialize<Recipe>(root.GetProperty("Recipe").GetRawText());
+                if (restoredRecipe != null)
+                {
+                    CurrentRecipe = restoredRecipe;
+                    SelectedPoint = CurrentRecipe.Points.FirstOrDefault();
+                }
+            }
+            catch { }
+            finally
+            {
+                _isApplyingUndoRedo = false;
+            }
         }
 
         public void SaveCurrentConfigAndRecipe()
@@ -1460,6 +1714,7 @@ namespace MultiScanX.App.ViewModels
             }
             catch { /* ignore path error in sandbox */ }
 
+            TakeIoSnapshot();
             StatusMessage = $"시스템 설정(DI/DO/AI/CNT2 매핑: system_config.json) 및 레시피({CurrentRecipe.RecipeName}) 저장 완료";
             AddLog(StatusMessage);
         }

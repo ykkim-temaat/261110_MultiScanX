@@ -159,12 +159,18 @@ Windows 기본 원격 데스크톱(RDP)은 실물 모니터와 화면이 분리�
 
 ---
 
-### Step 5. (일상 작업) 개발/시운전 중 빠른 실행 파일 복사 및 재실행 루프
-최초 설치(`Step 4`)가 끝난 이후에는 코드를 고칠 때마다 Setup 마법사를 다시 돌릴 필요가 없습니다:
+### Step 5. (일상 작업) 개발/시운전 중 IPC 테스트 배포 구분 기준 (`Release_Bin` vs `MultiScanX_deploy`)
+
+| 구분 | 적용 상황 | IPC 적용 방법 |
+| :---: | :--- | :--- |
+| **`src\Release_Bin\` 복사** *(일반 개발/테스트)* | 설치 환경 변화 없이 `src\` 내 C# 코드만 수정된 경우 | **`src\Release_Bin\` 폴더의 내용만** IPC의 `C:\MultiScanX\bin\`에 덮어쓰기 복사 후 즉시 실행 |
+| **`MultiScanX_deploy\` 재설치** *(설치환경 검증)* | 신규 PC 셋업, 런타임/드라이버 추가, `Installer.iss` 변경 등 **설치환경 설정 변화 또는 설치환경 동작 검증 목적**인 경우 | `MultiScanX_deploy` 전체 업로드 후 `MultiScanX_Setup_vX.Y.Z.exe` 재설치 및 진단 스크립트 실행 |
+
+최초 설치(`Step 4`)가 끝난 이후 일반 코드 수정 시에는 Setup 마법사를 다시 돌릴 필요가 없습니다:
 
 1. **노트북:** `.\src\build_deploy.ps1 -PatchOnly` 실행 (2초 소요 ➔ `src\Release_Bin\MultiScanX.App.exe` 갱신)
 2. **IPC 앱 종료:** 실행 중인 `MultiScan-X Studio` 창 닫기
-3. **고속 복사 (0.1초):** WinSCP로 노트북 `src\Release_Bin\MultiScanX.App.exe` (~380 KB)만 IPC의 **`C:\MultiScanX\bin\`**에 덮어쓰기
+3. **고속 복사 (0.1초):** WinSCP로 노트북 `src\Release_Bin\` 폴더의 내용만 IPC의 **`C:\MultiScanX\bin\`**에 덮어쓰기
 4. **즉시 재실행:** IPC 바탕화면의 **`MultiScan-X Studio`** 아이콘 더블클릭!
 
 ---

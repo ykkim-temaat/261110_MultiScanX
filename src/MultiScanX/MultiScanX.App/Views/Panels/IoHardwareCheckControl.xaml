@@ -160,27 +160,31 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- 상단 공통 헤더: 실물 AXL 온라인 상태 배지 & 재연결/저장 버튼 -->
-                <DockPanel Grid.Row="0" Margin="0,0,0,10">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🛠 아진엑스텍 EtherCAT 슬레이브 실시간 점검 &amp; Low-Level 설정" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Border Background="{Binding AxlConnectionBadgeBg}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="{Binding AxlConnectionBadgeText}" Foreground="{Binding AxlConnectionBadgeFg}" FontSize="11.5" FontWeight="Bold"/>
+                <!-- 상단 공통 헤더: 좌측 타이틀/상태(*) & 우측 버튼 3종(Auto) — 절대 가려지지 않도록 Grid 분리 -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <WrapPanel VerticalAlignment="Center">
+                            <TextBlock Text="🛠 아진엑스텍 EtherCAT 슬레이브 실시간 점검 &amp; Low-Level 설정" FontSize="14" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" Margin="0,0,8,2"/>
+                            <Border Background="{Binding AxlConnectionBadgeBg}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="7,2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding AxlConnectionBadgeText}" Foreground="{Binding AxlConnectionBadgeFg}" FontSize="11" FontWeight="Bold"/>
                             </Border>
-                        </StackPanel>
+                        </WrapPanel>
                         <TextBlock Text="50ms(20Hz) 주기로 DB32T(16DI/16DO), AI16(16CH 전압/전류), CNT2(2CH 카운터/트리거)를 실시간 폴링합니다."
-                                   FontSize="11" Foreground="#64748B" Margin="0,3,0,0"/>
+                                   FontSize="11" Foreground="#64748B" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
 
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <Button Content="{Binding IoLockButtonText}" Background="{Binding AdminLockBadgeBg}" Foreground="{Binding AdminLockBadgeFg}"
                                 BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11.5" Padding="10,5" Margin="0,0,6,0" Cursor="Hand"
                                 Click="BtnToggleIoLock_Click"/>
                         <Button Content="🔌 AXL 실물 재연결/스캔" Style="{StaticResource SoftActionButton}" Margin="0,0,6,0" Click="BtnReconnectAxl_Click"/>
                         <Button Content="💾 I/O·AI·CNT2 설정 저장" Style="{StaticResource MintActionButton}" Click="BtnSaveIoConfig_Click"/>
                     </StackPanel>
-                </DockPanel>
+                </Grid>
 
                 <!-- 3단 서브탭: [1] DB32T 디지털 I/O | [2] AI16 아날로그 입력 | [3] CNT2 고속 카운터 Low-Level -->
                 <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
@@ -345,7 +349,7 @@
                                                     <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
                                                     <Grid Grid.Column="1" Margin="0,0,6,0">
                                                         <ComboBox ItemsSource="{Binding DataContext.AiDipSwitchOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                  SelectedItem="{Binding DipSwitchMode, Mode=TwoWay}"
+                                                                  SelectedItem="{Binding DipSwitchMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                   Visibility="{Binding SupportsCurrentDip, Converter={StaticResource BoolToVis}}"
                                                                   IsEnabled="{Binding DataContext.IsAdminUnlocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                   Height="26" FontSize="10.5"/>
@@ -366,7 +370,7 @@
                                                              IsReadOnly="{Binding DataContext.IsIoEditLocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                              Style="{StaticResource PastelTextBoxStyle}" Margin="0,0,8,0"/>
                                                     <ComboBox Grid.Column="3" ItemsSource="{Binding DataContext.AiSignalModeOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                              SelectedItem="{Binding SignalMode, Mode=TwoWay}"
+                                                              SelectedItem="{Binding SignalMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                               IsEnabled="{Binding DataContext.IsAdminUnlocked, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                               Height="26" FontSize="11" Margin="0,0,8,0"/>
 

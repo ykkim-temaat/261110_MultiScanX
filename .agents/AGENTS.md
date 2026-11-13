@@ -73,3 +73,10 @@
 ## 11. SkyCAD 파일 커밋 및 환경 저장소(`C:\Workspaces\SkyCAD`) 동시 푸시 규칙
 * 프로젝트 내 SkyCAD 관련 파일(`.SkyCadFile` 등)이 변경되어 Git 커밋 및 푸시를 수행할 때는 **반드시 `C:\Workspaces\SkyCAD` (SkyCAD Standard Environment 저장소, `git@github.com:ykkim-temaat/SkyCAD_Env.git`)의 변경 상태(`git status`)도 함께 점검하여 동시에 커밋하고 푸시**합니다.
 
+## 12. IPC 배포·테스트 구분 원칙 (`src\Release_Bin` vs `MultiScanX_deploy`) 및 Git 푸시 사전 확인 규칙
+* **IPC 테스트/배포 방식 구분 가이드 (MANDATORY — `MultiScanX_deploy` 무결성 우선 원칙):**
+  * **`MultiScanX_deploy\` 재배포·검증 (`MultiScanX_deploy` 우선 원칙):** `MultiScanX_deploy` 배포팩이 항상 우선 기준입니다. 설치환경 설정(런타임, 드라이버, `MultiScanX_Installer.iss`)뿐 아니라 **`MultiScanX_deploy\` 내부 파일(`03_Diagnostics\*.ps1`, `*.bat`, 문서/스크립트 등)에 변화가 있는 경우**, 배포팩 전체의 무결성을 확보하기 위해 **반드시 `MultiScanX_deploy` 폴더를 이용해 재배포·재설치 및 검증**하도록 가이드합니다.
+  * **`src\Release_Bin\` 복사 테스트 (단순 앱 코드 변경 시 속도 최적화):** `MultiScanX_deploy` 내 설치·진단·환경 구성에 변화가 전혀 없고 **단순히 `src\` 애플리케이션 코드만 변경된 경우**에만, `src\Release_Bin\` 폴더의 실행파일(또는 추가된 파일)만 IPC(`C:\MultiScanX\bin\`)로 복사하여 테스트 속도를 높이도록 가이드합니다.
+* **Git 커밋 및 푸시 사전 확인 (MANDATORY):**
+  * `git commit` 및 `git push`는 **사용자의 명시적 지시 또는 사전 컨펌을 받은 후에만** 수행하며, 임의로 커밋·푸시를 실행하지 않습니다.
+

@@ -15,8 +15,8 @@
     <DefineConstants Condition="'$(GuiLayout)' == 'A'">$(DefineConstants);LAYOUT_A</DefineConstants>
     <DefineConstants Condition="'$(GuiLayout)' == 'B'">$(DefineConstants);LAYOUT_B</DefineConstants>
     <DefineConstants Condition="'$(GuiLayout)' == 'C'">$(DefineConstants);LAYOUT_C</DefineConstants>
-    <Version>1.2.3</Version>
-    <Description>아진 공식 API(AxaiSwReadVoltage/AxcStatusGetActPos/AxmStatusGetActPos) 교정, 엔지니어 편집 잠금(PW) 및 AI CH1~4 DIP 스위치 선택 반영</Description>
+    <Version>1.2.5</Version>
+    <Description>AI/DIO/창닫기 편집 저장확인 누락 보완 및 PasswordBox 이후 한글 IME(Shift+Space) 전환 복원</Description>
   </PropertyGroup>
 
   <ItemGroup>

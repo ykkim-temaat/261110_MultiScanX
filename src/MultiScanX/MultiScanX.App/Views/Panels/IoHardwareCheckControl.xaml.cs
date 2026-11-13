@@ -7,9 +7,55 @@ namespace MultiScanX.App.Views.Panels
 {
     public partial class IoHardwareCheckControl : UserControl
     {
+        private Window? _hostWindow;
+
         public IoHardwareCheckControl()
         {
             InitializeComponent();
+            Loaded += (_, _) =>
+            {
+                _hostWindow = Window.GetWindow(this);
+                if (_hostWindow != null)
+                {
+                    _hostWindow.Closing -= HostWindow_Closing;
+                    _hostWindow.Closing += HostWindow_Closing;
+                }
+            };
+            Unloaded += (_, _) =>
+            {
+                if (_hostWindow != null)
+                {
+                    _hostWindow.Closing -= HostWindow_Closing;
+                    _hostWindow = null;
+                }
+            };
+        }
+
+        private void HostWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is MainViewModel vm && vm.IsAdminUnlocked && vm.HasIoConfigChanges())
+            {
+                if (!ConfirmSaveOrRestoreIfDirty(vm))
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
+
+        private static bool ConfirmSaveOrRestoreIfDirty(MainViewModel vm)
+        {
+            if (!vm.HasIoConfigChanges()) return true;
+
+            var res = MessageBox.Show(
+                "편집한 I/O·AI·CNT2 설정을 저장하시겠습니까?\n\n[예] 변경 사항 저장 후 잠금\n[아니오] 변경 사항 취소(원복) 후 잠금\n[취소] 계속 편집",
+                "설정 저장 확인",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Question);
+
+            if (res == MessageBoxResult.Cancel) return false;
+            if (res == MessageBoxResult.Yes) vm.SaveCurrentConfigAndRecipe();
+            else if (res == MessageBoxResult.No) vm.RestoreIoSnapshot();
+            return true;
         }
 
         private void BtnStepXY_Click(object sender, RoutedEventArgs e)
@@ -102,31 +148,37 @@ namespace MultiScanX.App.Views.Panels
             if (DataContext is not MainViewModel vm) return;
             if (vm.IsAdminUnlocked)
             {
+                if (!ConfirmSaveOrRestoreIfDirty(vm))
+                {
+                    return;
+                }
                 vm.IsAdminUnlocked = false;
                 return;
             }
 
-            // 비밀번호 입력 팝업 창
+            // 비밀번호 입력 팝업 창 (SizeToContent로 버튼 짤림 방지 + Enter/Esc 지원)
             var dlg = new Window
             {
                 Title = "엔지니어 편집 잠금 해제",
-                Width = 340,
-                Height = 175,
+                MinWidth = 350,
+                SizeToContent = SizeToContent.WidthAndHeight,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = Window.GetWindow(this),
                 ResizeMode = ResizeMode.NoResize
             };
-            var sp = new StackPanel { Margin = new Thickness(16) };
+            var sp = new StackPanel { Margin = new Thickness(18) };
             sp.Children.Add(new TextBlock
             {
                 Text = "I/O·AI·CNT2 명칭 및 스케일 편집을 위해\n엔지니어 비밀번호를 입력하세요. (기본: 0000)",
                 Margin = new Thickness(0, 0, 0, 10),
-                FontSize = 12
+                FontSize = 12.5
             });
-            var pwBox = new PasswordBox { Height = 28, Padding = new Thickness(6, 4, 6, 4), Margin = new Thickness(0, 0, 0, 12) };
+            var pwBox = new PasswordBox { Height = 30, Padding = new Thickness(8, 5, 8, 5), Margin = new Thickness(0, 0, 0, 14) };
             sp.Children.Add(pwBox);
 
-            var btnOk = new Button { Content = "🔓 잠금 해제", Height = 30, IsDefault = true };
+            var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+            var btnCancel = new Button { Content = "취소 (Esc)", Width = 90, Height = 32, Margin = new Thickness(0, 0, 8, 0), IsCancel = true };
+            var btnOk = new Button { Content = "🔓 잠금 해제", Width = 115, Height = 32, IsDefault = true };
             btnOk.Click += (_, _) =>
             {
                 if (pwBox.Password == vm.CurrentConfig.AdminPassword)
@@ -142,9 +194,12 @@ namespace MultiScanX.App.Views.Panels
                     pwBox.Focus();
                 }
             };
-            sp.Children.Add(btnOk);
+            btnPanel.Children.Add(btnCancel);
+            btnPanel.Children.Add(btnOk);
+            sp.Children.Add(btnPanel);
+
             dlg.Content = sp;
-            pwBox.Focus();
+            dlg.Loaded += (_, _) => pwBox.Focus();
             dlg.ShowDialog();
         }
 
