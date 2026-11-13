@@ -51,6 +51,15 @@
 
 ---
 
+4. **IPC 실물 EtherCAT 연동 성공 및 `MultiScanX_deploy` 배포 3대 개선 + UI 디테일 패치 (`v1.2.2`):**
+   * **실물 검증 완료:** IPC(`Nuvo-9002E`)에서 `🟢 AXL Online (Axes:2 | DIO:1 | AI:1 | CNT:1)` 및 실물 `N3ECAT-DB32T` 배선(`DI01`, `DI09` = `ON (1)`, `DI Word: 0x0101`) 1:1 실시간 동기화 확인 완료.
+   * **배포 개선 1 (PowerShell 보안 정책 우회):** [01_IPC_시스템진단_실행.bat](../MultiScanX_deploy/03_Diagnostics/01_IPC_시스템진단_실행.bat), [02_EtherCAT_벤치테스트_실행.bat](../MultiScanX_deploy/03_Diagnostics/02_EtherCAT_벤치테스트_실행.bat) 더블클릭 원클릭 실행 런처 추가 (`ExecutionPolicy Bypass`).
+   * **배포 개선 2 (`AXL.dll` 64비트 자동 탐색·등록·복사):**
+     * [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs)에 `CAXL.EnsureAjinDllPathRegistered()`(`SetDllDirectory`) 구현으로 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit` 자동 인식.
+     * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
+   * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
+   * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
+
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
 | :--- | :--- |
@@ -117,6 +126,15 @@
 
 ---
 
+4. **IPC 실물 EtherCAT 연동 성공 및 `MultiScanX_deploy` 배포 3대 개선 + UI 디테일 패치 (`v1.2.2`):**
+   * **실물 검증 완료:** IPC(`Nuvo-9002E`)에서 `🟢 AXL Online (Axes:2 | DIO:1 | AI:1 | CNT:1)` 및 실물 `N3ECAT-DB32T` 배선(`DI01`, `DI09` = `ON (1)`, `DI Word: 0x0101`) 1:1 실시간 동기화 확인 완료.
+   * **배포 개선 1 (PowerShell 보안 정책 우회):** [01_IPC_시스템진단_실행.bat](../MultiScanX_deploy/03_Diagnostics/01_IPC_시스템진단_실행.bat), [02_EtherCAT_벤치테스트_실행.bat](../MultiScanX_deploy/03_Diagnostics/02_EtherCAT_벤치테스트_실행.bat) 더블클릭 원클릭 실행 런처 추가 (`ExecutionPolicy Bypass`).
+   * **배포 개선 2 (`AXL.dll` 64비트 자동 탐색·등록·복사):**
+     * [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs)에 `CAXL.EnsureAjinDllPathRegistered()`(`SetDllDirectory`) 구현으로 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit` 자동 인식.
+     * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
+   * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
+   * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
+
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
 | :--- | :--- |
@@ -176,6 +194,15 @@
 
 ---
 
+4. **IPC 실물 EtherCAT 연동 성공 및 `MultiScanX_deploy` 배포 3대 개선 + UI 디테일 패치 (`v1.2.2`):**
+   * **실물 검증 완료:** IPC(`Nuvo-9002E`)에서 `🟢 AXL Online (Axes:2 | DIO:1 | AI:1 | CNT:1)` 및 실물 `N3ECAT-DB32T` 배선(`DI01`, `DI09` = `ON (1)`, `DI Word: 0x0101`) 1:1 실시간 동기화 확인 완료.
+   * **배포 개선 1 (PowerShell 보안 정책 우회):** [01_IPC_시스템진단_실행.bat](../MultiScanX_deploy/03_Diagnostics/01_IPC_시스템진단_실행.bat), [02_EtherCAT_벤치테스트_실행.bat](../MultiScanX_deploy/03_Diagnostics/02_EtherCAT_벤치테스트_실행.bat) 더블클릭 원클릭 실행 런처 추가 (`ExecutionPolicy Bypass`).
+   * **배포 개선 2 (`AXL.dll` 64비트 자동 탐색·등록·복사):**
+     * [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs)에 `CAXL.EnsureAjinDllPathRegistered()`(`SetDllDirectory`) 구현으로 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit` 자동 인식.
+     * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
+   * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
+   * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
+
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
 | :--- | :--- |
@@ -224,6 +251,15 @@
    * `.\src\build_deploy.ps1 -PatchOnly` 실행 검증: `MultiScanX.App.exe` (232.6 KB, `FileVersion: 1.0.3.0`, `Comments` 필드 매핑) 및 정상 부팅(`Alive=True`) 확인
 4. **소프트웨어 기능 정의 체크리스트 작성 (`261111-02`):**
    * [docs/261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md](./261111-02_MultiScanX_소프트웨어_기능정의_체크리스트.md) 생성 (권한/모드, UI/IO Check, 모션/정렬, 3종 계측기, 시퀀스, 안전/알람, 레시피/데이터, 외부연동 8대 영역 구성)
+
+4. **IPC 실물 EtherCAT 연동 성공 및 `MultiScanX_deploy` 배포 3대 개선 + UI 디테일 패치 (`v1.2.2`):**
+   * **실물 검증 완료:** IPC(`Nuvo-9002E`)에서 `🟢 AXL Online (Axes:2 | DIO:1 | AI:1 | CNT:1)` 및 실물 `N3ECAT-DB32T` 배선(`DI01`, `DI09` = `ON (1)`, `DI Word: 0x0101`) 1:1 실시간 동기화 확인 완료.
+   * **배포 개선 1 (PowerShell 보안 정책 우회):** [01_IPC_시스템진단_실행.bat](../MultiScanX_deploy/03_Diagnostics/01_IPC_시스템진단_실행.bat), [02_EtherCAT_벤치테스트_실행.bat](../MultiScanX_deploy/03_Diagnostics/02_EtherCAT_벤치테스트_실행.bat) 더블클릭 원클릭 실행 런처 추가 (`ExecutionPolicy Bypass`).
+   * **배포 개선 2 (`AXL.dll` 64비트 자동 탐색·등록·복사):**
+     * [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs)에 `CAXL.EnsureAjinDllPathRegistered()`(`SetDllDirectory`) 구현으로 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit` 자동 인식.
+     * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
+   * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
+   * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
 
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
@@ -281,6 +317,15 @@
      3. **`MultiScanX_LayoutC_FloatingStudio.exe` (초안 C: 미니멀 메인 관제 데스크 + 독립 플로팅 스튜디오 팝업형) ➔ 사용자 검토 후 메인 GUI로 최종 채택 (`App.xaml.cs` 기본값 반영)**
    * **`ethercat_bench_test.ps1` 보강:** 기존 3종 I/O 모듈 외 파나소닉 서보 X/Y 2축(`AxmInfoGetAxisCount`, `AxmSignalIsServoOn`, `AxmStatusReadActPos`) 인식 진단 추가
 
+4. **IPC 실물 EtherCAT 연동 성공 및 `MultiScanX_deploy` 배포 3대 개선 + UI 디테일 패치 (`v1.2.2`):**
+   * **실물 검증 완료:** IPC(`Nuvo-9002E`)에서 `🟢 AXL Online (Axes:2 | DIO:1 | AI:1 | CNT:1)` 및 실물 `N3ECAT-DB32T` 배선(`DI01`, `DI09` = `ON (1)`, `DI Word: 0x0101`) 1:1 실시간 동기화 확인 완료.
+   * **배포 개선 1 (PowerShell 보안 정책 우회):** [01_IPC_시스템진단_실행.bat](../MultiScanX_deploy/03_Diagnostics/01_IPC_시스템진단_실행.bat), [02_EtherCAT_벤치테스트_실행.bat](../MultiScanX_deploy/03_Diagnostics/02_EtherCAT_벤치테스트_실행.bat) 더블클릭 원클릭 실행 런처 추가 (`ExecutionPolicy Bypass`).
+   * **배포 개선 2 (`AXL.dll` 64비트 자동 탐색·등록·복사):**
+     * [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs)에 `CAXL.EnsureAjinDllPathRegistered()`(`SetDllDirectory`) 구현으로 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit` 자동 인식.
+     * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
+   * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
+   * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
+
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |
 | :--- | :--- |
@@ -320,6 +365,15 @@
      * 좌측 `3축 모션 JOG` 카드에 `[🎯 Z-Scale 0점 리셋]` 원클릭 단축 버튼 배치.
      * 우측 `CNT2 Low-Level` 탭에 `CH1/CH2` 28-bit Raw Pulse/Hex 모니터, `0x7000/0x7002` 원점 0점 초기화 및 지정 위치 Preset, `0x2001` 체배율(`Up/Down`, `1/2/4체배`), `0x2002` 카운트 방향(`CW/CCW`), `0x7010` 고속 위치 비교 트리거 및 One-Shot 수동 발사 UI 구현.
    * `v1.2.0` 패치 실행 파일(`src/Release_Bin/MultiScanX.App.exe`, 375.1 KB) 및 정식 인스톨러(`MultiScanX_Setup_v1.2.0.exe`, 2.11 MB) 빌드 완료.
+
+4. **IPC 실물 EtherCAT 연동 성공 및 `MultiScanX_deploy` 배포 3대 개선 + UI 디테일 패치 (`v1.2.2`):**
+   * **실물 검증 완료:** IPC(`Nuvo-9002E`)에서 `🟢 AXL Online (Axes:2 | DIO:1 | AI:1 | CNT:1)` 및 실물 `N3ECAT-DB32T` 배선(`DI01`, `DI09` = `ON (1)`, `DI Word: 0x0101`) 1:1 실시간 동기화 확인 완료.
+   * **배포 개선 1 (PowerShell 보안 정책 우회):** [01_IPC_시스템진단_실행.bat](../MultiScanX_deploy/03_Diagnostics/01_IPC_시스템진단_실행.bat), [02_EtherCAT_벤치테스트_실행.bat](../MultiScanX_deploy/03_Diagnostics/02_EtherCAT_벤치테스트_실행.bat) 더블클릭 원클릭 실행 런처 추가 (`ExecutionPolicy Bypass`).
+   * **배포 개선 2 (`AXL.dll` 64비트 자동 탐색·등록·복사):**
+     * [AXL.cs](../src/MultiScanX/MultiScanX.Hardware/Ajinextek/AXL.cs)에 `CAXL.EnsureAjinDllPathRegistered()`(`SetDllDirectory`) 구현으로 `C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit` 자동 인식.
+     * [MultiScanX_Installer.iss](../src/MultiScanX_Installer.iss)에 `EzSoftware UC` 64비트 DLL을 `{app}\bin`으로 자동 복사하는 규칙 추가.
+   * **배포 개선 3 (진단 스크립트 고도화):** `ipc_diagnostics.ps1` 및 `ethercat_bench_test.ps1`에 `AXL.dll` 단일 호출 및 64비트 라이브러리 경로 자동 탐색/PATH 등록 적용.
+   * **UI 디테일 개선:** `IoHardwareCheckControl.xaml` 3단 탭 헤더 1줄 정리, `DI01~DI16`/`DO01~DO16` 16행 한눈에 보기 패딩 최적화, `Brake: RELEASED` 버튼 텍스트 잘림 해소 (`v1.2.2` 빌드 완료).
 
 ### 3. 주요 생성 및 변경 산출물 목록
 | 파일 경로 | 설명 |

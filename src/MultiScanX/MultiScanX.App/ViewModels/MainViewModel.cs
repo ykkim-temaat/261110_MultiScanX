@@ -460,7 +460,7 @@ namespace MultiScanX.App.ViewModels
             set { _isZBrakeReleased = value; OnPropertyChanged(); OnPropertyChanged(nameof(ZBrakeStatusText)); }
         }
 
-        public string ZBrakeStatusText => IsZBrakeReleased ? "Brake: RELEASED (동작가능)" : "Brake: LOCKED (하강방지)";
+        public string ZBrakeStatusText => IsZBrakeReleased ? "Brake: RELEASED" : "Brake: LOCKED";
 
         // 4. CAS CI-600A 로드셀 인디케이터 (07-2_141116_CI600A_KOR_UM.pdf 사양 반영)
         private double _currentLoadGram = 0.0;
@@ -844,6 +844,12 @@ namespace MultiScanX.App.ViewModels
         {
             try
             {
+                string? detectedDllDir = CAXL.EnsureAjinDllPathRegistered();
+                if (!string.IsNullOrWhiteSpace(detectedDllDir))
+                {
+                    AddLog($"[AXL 자동경로] 64-bit AXL.dll 인식: {detectedDllDir}");
+                }
+
                 bool dioOk = _ajinDio.Initialize();
                 if (CAXL.AxlIsOpened() != 0 || dioOk)
                 {

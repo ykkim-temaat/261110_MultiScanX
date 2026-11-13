@@ -15,8 +15,8 @@
     <DefineConstants Condition="'$(GuiLayout)' == 'A'">$(DefineConstants);LAYOUT_A</DefineConstants>
     <DefineConstants Condition="'$(GuiLayout)' == 'B'">$(DefineConstants);LAYOUT_B</DefineConstants>
     <DefineConstants Condition="'$(GuiLayout)' == 'C'">$(DefineConstants);LAYOUT_C</DefineConstants>
-    <Version>1.2.1</Version>
-    <Description>PastelTabItemStyle 리소스 누락 핫픽스 및 실물 DIO(DB32T)·AI16(16CH)·CNT2(Z-Scale) 3단 탭 통합</Description>
+    <Version>1.2.2</Version>
+    <Description>AXL 64비트 DLL 자동경로 탐색, 1줄 서브탭·16채널 I/O 가시성 개선 및 배포 스크립트 원클릭 실행(.bat) 보강</Description>
   </PropertyGroup>
 
   <ItemGroup>

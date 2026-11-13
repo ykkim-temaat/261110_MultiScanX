@@ -41,6 +41,8 @@ Name: "{app}\versions"
 
 [Files]
 Source: "Release_Bin\{#MyAppExeName}"; DestDir: "{app}\bin"; Flags: ignoreversion
+; 타겟 IPC에 EzSoftware UC가 설치되어 있을 경우 64비트 AXL.dll 및 종속 DLL을 자동 복사
+Source: "C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit\*.dll"; DestDir: "{app}\bin"; Flags: ignoreversion external skipifsourcedoesntexist
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\bin\{#MyAppExeName}"

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace MultiScanX.Hardware.Ajinextek
@@ -10,6 +11,42 @@ namespace MultiScanX.Hardware.Ajinextek
     public static class CAXL
     {
         private const string DllName = "AXL.dll";
+        private static bool _dllPathChecked = false;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool SetDllDirectory(string lpPathName);
+
+        /// <summary>
+        /// 실행 폴더에 AXL.dll이 없을 경우 EzSoftware UC 64비트 공식 설치 경로를 자동 탐색하여 DLL 검색 경로에 등록
+        /// </summary>
+        public static string? EnsureAjinDllPathRegistered()
+        {
+            if (_dllPathChecked) return null;
+            _dllPathChecked = true;
+
+            string[] candidates =
+            {
+                AppContext.BaseDirectory,
+                @"C:\MultiScanX\bin",
+                @"C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit",
+                @"C:\Program Files\EzSoftware UC\AXL(Library)\Library\64Bit",
+                @"C:\Program Files (x86)\EzSoftware UC\Examples\Visual C#\Executable\64Bit"
+            };
+
+            foreach (string dir in candidates)
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(dir) && File.Exists(Path.Combine(dir, DllName)))
+                    {
+                        SetDllDirectory(dir);
+                        return dir;
+                    }
+                }
+                catch { }
+            }
+            return null;
+        }
 
         [DllImport(DllName)]
         public static extern int AxlOpen(int lIrqNo);

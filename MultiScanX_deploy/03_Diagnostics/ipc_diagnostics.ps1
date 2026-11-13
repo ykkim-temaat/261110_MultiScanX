@@ -55,16 +55,38 @@ try {
     Write-Host "  - [WARN] 'dotnet' command not found." -ForegroundColor Yellow
 }
 
-# 5. Ajinextek Library (AXL.dll) Inspection
+# 5. Ajinextek Library (AXL.dll) Inspection & Auto-Path Detection
 Write-Host "`n[5] Ajinextek EtherCAT Master Library (AXL.dll) Inspection" -ForegroundColor Green
+$ajinCandidates = @(
+    "C:\MultiScanX\bin",
+    "C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit",
+    "C:\Program Files\EzSoftware UC\AXL(Library)\Library\64Bit"
+)
+$foundAxlPaths = @()
+foreach ($dir in $ajinCandidates) {
+    $dllPath = Join-Path $dir "AXL.dll"
+    if (Test-Path $dllPath) {
+        $foundAxlPaths += $dllPath
+        if ($env:PATH -notlike "*$dir*") {
+            $env:PATH = "$dir;$env:PATH"
+        }
+    }
+}
+if (Test-Path "C:\Windows\System32\AXL.dll") { $foundAxlPaths += "C:\Windows\System32\AXL.dll" }
+
+if ($foundAxlPaths.Count -gt 0) {
+    Write-Host "  - Detected 64-bit AXL.dll Path(s):" -ForegroundColor Gray
+    foreach ($p in $foundAxlPaths) { Write-Host "     -> $p" -ForegroundColor Gray }
+}
+
 try {
     $csharpCode = @"
     using System;
     using System.Runtime.InteropServices;
     public class AxCheck {
-        [DllImport("AXL.dll")]
+        [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)]
         public static extern uint AxlOpen(int uMode);
-        [DllImport("AXL.dll")]
+        [DllImport("AXL.dll", CallingConvention = CallingConvention.StdCall)]
         public static extern int AxlIsOpened();
     }
 "@

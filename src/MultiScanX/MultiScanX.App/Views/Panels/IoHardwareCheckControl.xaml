@@ -181,7 +181,7 @@
                     <!-- ================================================================================= -->
                     <!-- [탭 1] N3ECAT-DB32T (Node 0x04) 16 DI / 16 DO 실시간 모니터 및 동적 명칭 편집        -->
                     <!-- ================================================================================= -->
-                    <TabItem Header="📥📤 1. 디지털 입출력 (N3ECAT-DB32T: 16 DI / 16 DO)" Style="{StaticResource PastelTabItemStyle}">
+                    <TabItem Header="📥📤 1. DB32T 디지털 I/O (16DI/16DO)" Style="{StaticResource PastelTabItemStyle}">
                         <Grid Margin="0,8,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -210,24 +210,24 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- 좌: 16 DI 입력 채널 리스트 (TxPDO 0x1A00 -> 0x6000:00) -->
-                                <Border Grid.Column="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                                <Border Grid.Column="0" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="8">
                                     <DockPanel>
-                                        <TextBlock DockPanel.Dock="Top" Text="📥 Digital Input (DI01 ~ DI16, 0x6000) — 실물 센서 상태 모니터" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,8"/>
+                                        <TextBlock DockPanel.Dock="Top" Text="📥 Digital Input (DI01 ~ DI16, 0x6000) — 실물 센서 상태 모니터" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,6"/>
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                                             <ItemsControl ItemsSource="{Binding DiChannels}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
+                                                        <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="6,2.5" Margin="0,0,0,2.5">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="48"/>
+                                                                    <ColumnDefinition Width="46"/>
                                                                     <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="78"/>
+                                                                    <ColumnDefinition Width="74"/>
                                                                 </Grid.ColumnDefinitions>
-                                                                <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
+                                                                <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" FontSize="11.5" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Padding="5,2" Margin="4,0,8,0"/>
                                                                 <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
-                                                                        BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
+                                                                        BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Padding="4,2" Cursor="Hand"
                                                                         Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
                                                             </Grid>
                                                         </Border>
@@ -239,24 +239,24 @@
                                 </Border>
 
                                 <!-- 우: 16 DO 출력 채널 리스트 (RxPDO 0x1601 -> 0x7010:00) -->
-                                <Border Grid.Column="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10">
+                                <Border Grid.Column="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="8">
                                     <DockPanel>
-                                        <TextBlock DockPanel.Dock="Top" Text="📤 Digital Output (DO01 ~ DO16, 0x7010) — 클릭 시 실물/시뮬 출력 토글" FontWeight="Bold" Foreground="#047857" Margin="0,0,0,8"/>
+                                        <TextBlock DockPanel.Dock="Top" Text="📤 Digital Output (DO01 ~ DO16, 0x7010) — 클릭 시 실물/시뮬 출력 토글" FontWeight="Bold" Foreground="#047857" Margin="0,0,0,6"/>
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                                             <ItemsControl ItemsSource="{Binding DoChannels}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6,4" Margin="0,0,0,4">
+                                                        <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="6,2.5" Margin="0,0,0,2.5">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="48"/>
+                                                                    <ColumnDefinition Width="46"/>
                                                                     <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="78"/>
+                                                                    <ColumnDefinition Width="74"/>
                                                                 </Grid.ColumnDefinitions>
-                                                                <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Margin="4,0,8,0"/>
+                                                                <TextBlock Grid.Column="0" Text="{Binding Code}" FontWeight="Bold" FontSize="11.5" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PastelTextBoxStyle}" Padding="5,2" Margin="4,0,8,0"/>
                                                                 <Button Grid.Column="2" Content="{Binding StateText}" Background="{Binding BadgeBg}" Foreground="{Binding BadgeFg}"
-                                                                        BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand"
+                                                                        BorderBrush="#CBD5E1" BorderThickness="1" FontWeight="Bold" FontSize="11" Padding="4,2" Cursor="Hand"
                                                                         Click="BtnToggleIoBit_Click" Tag="{Binding}"/>
                                                             </Grid>
                                                         </Border>
@@ -273,7 +273,7 @@
                     <!-- ================================================================================= -->
                     <!-- [탭 2] N3ECAT-AI16 (Node 0x05) 16CH 아날로그 입력 정의, 스케일링 및 실시간 모니터링  -->
                     <!-- ================================================================================= -->
-                    <TabItem Header="📈 2. 아날로그 입력 &amp; 스케일링 (N3ECAT-AI16: CH01 ~ CH16)" Style="{StaticResource PastelTabItemStyle}">
+                    <TabItem Header="📈 2. AI16 아날로그 입력 (16CH)" Style="{StaticResource PastelTabItemStyle}">
                         <Grid Margin="0,8,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -362,7 +362,7 @@
                     <!-- ================================================================================= -->
                     <!-- [탭 3] N3ECAT-CNT2 (Node 0x03) Z축 리니어스케일 Low-Level 세팅 및 고속 위치 트리거  -->
                     <!-- ================================================================================= -->
-                    <TabItem Header="📏 3. 고속 카운터 &amp; 트리거 Low-Level (N3ECAT-CNT2: Z-Scale)" Style="{StaticResource PastelTabItemStyle}">
+                    <TabItem Header="📏 3. CNT2 고속 카운터 (Z-Scale)" Style="{StaticResource PastelTabItemStyle}">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                             <StackPanel>
                                 <!-- 안내 배너 -->

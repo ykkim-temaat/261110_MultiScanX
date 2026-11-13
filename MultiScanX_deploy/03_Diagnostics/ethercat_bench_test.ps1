@@ -11,6 +11,22 @@ Write-Host "               TeMaat Automation Research Institute                 
 Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Auto-detect 64-bit Ajinextek AXL.dll installation directory and register in process PATH
+$ajinSearchDirs = @(
+    "C:\MultiScanX\bin",
+    "C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit",
+    "C:\Program Files\EzSoftware UC\AXL(Library)\Library\64Bit"
+)
+foreach ($dir in $ajinSearchDirs) {
+    if (Test-Path (Join-Path $dir "AXL.dll")) {
+        if ($env:PATH -notlike "*$dir*") {
+            $env:PATH = "$dir;$env:PATH"
+        }
+        Write-Host " [AUTO-PATH] Registered 64-bit AXL.dll directory: $dir" -ForegroundColor DarkCyan
+        break
+    }
+}
+
 # P/Invoke C# Native Wrapper Definition
 $csharpCode = @"
 using System;
